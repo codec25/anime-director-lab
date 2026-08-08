@@ -1,0 +1,30 @@
+anime_director_lab/
+├── .env.example
+├── .gitignore
+├── .htaccess
+├── README.md
+├── RESEARCH-NOTES.md
+├── api.php
+├── index.php
+├── app/
+│   ├── .htaccess
+│   ├── bootstrap.php
+│   ├── state.php
+│   ├── storage.php
+│   └── providers/
+│       ├── ProviderInterface.php
+│       ├── RunwayProvider.php
+│       └── ViduProvider.php
+├── assets/
+│   ├── css/
+│   │   └── app.css
+│   └── js/
+│       └── app.js
+├── data/
+│   ├── .gitkeep
+│   └── .htaccess
+└── storage/
+    ├── .htaccess
+    ├── characters/.gitkeep
+    ├── performances/.gitkeep
+    └── results/.gitkeep
