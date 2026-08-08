@@ -1,29 +1,60 @@
 <?php
 declare(strict_types=1);
 
-function ad_store_upload(array $file, string $bucket): array {
-    $allowedBuckets = ['characters', 'performances'];
+function ad_safe_storage_relative(string $relativePath): string {
+    $relativePath = str_replace('\\', '/', $relativePath);
+    $relativePath = ltrim($relativePath, '/');
+    if ($relativePath === '' || str_contains($relativePath, '..')) {
+        throw new InvalidArgumentException('Invalid storage path.');
+    }
+    if (!str_starts_with($relativePath, 'storage/')) {
+        throw new InvalidArgumentException('Media path must stay under storage/.');
+    }
+    return $relativePath;
+}
+
+function ad_store_upload(array $file, string $bucket, ?string $role = null): array {
+    $allowedBuckets = ['characters', 'performances', 'sheets'];
     if (!in_array($bucket, $allowedBuckets, true)) throw new InvalidArgumentException('Invalid upload bucket.');
     if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) throw new RuntimeException('Upload failed.');
     $tmp = (string)($file['tmp_name'] ?? '');
-    if (!is_uploaded_file($tmp)) throw new RuntimeException('Invalid upload.');
+    if ($tmp === '' || !is_uploaded_file($tmp)) throw new RuntimeException('Invalid upload.');
 
     $size = (int)($file['size'] ?? 0);
-    $max = $bucket === 'characters' ? 50 * 1024 * 1024 : 100 * 1024 * 1024;
+    $max = ($bucket === 'performances') ? 100 * 1024 * 1024 : 50 * 1024 * 1024;
     if ($size < 1 || $size > $max) throw new RuntimeException('File is too large for this test.');
 
     $finfo = new finfo(FILEINFO_MIME_TYPE);
     $mime = (string)$finfo->file($tmp);
-    $allowed = $bucket === 'characters'
-        ? ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp']
-        : ['video/mp4' => 'mp4', 'video/quicktime' => 'mov'];
-    if (!isset($allowed[$mime])) throw new RuntimeException($bucket === 'characters' ? 'Use JPG, PNG, or WebP.' : 'Use MP4 or MOV.');
+    if ($bucket === 'performances') {
+        $allowed = ['video/mp4' => 'mp4', 'video/quicktime' => 'mov'];
+        if (!isset($allowed[$mime])) throw new RuntimeException('Use MP4 or MOV.');
+    } else {
+        $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+        if (!isset($allowed[$mime])) throw new RuntimeException('Use JPG, PNG, or WebP.');
+        if (@getimagesize($tmp) === false) throw new RuntimeException('The image could not be validated.');
+    }
 
-    if ($bucket === 'characters' && @getimagesize($tmp) === false) throw new RuntimeException('The image could not be validated.');
+    if ($role !== null && $bucket === 'characters') {
+        if (!in_array($role, ad_character_reference_roles(), true)) {
+            throw new InvalidArgumentException('Unknown character reference role.');
+        }
+    }
 
-    $name = ad_id($bucket === 'characters' ? 'character' : 'performance') . '.' . $allowed[$mime];
-    $relative = 'storage/' . $bucket . '/' . $name;
+    $prefix = match ($bucket) {
+        'characters' => 'character',
+        'performances' => 'performance',
+        'sheets' => 'sheet',
+        default => 'asset',
+    };
+    $name = ad_id($prefix) . ($role ? ('_' . preg_replace('/[^a-z0-9_]/', '', $role)) : '') . '.' . $allowed[$mime];
+    $targetBucket = $bucket === 'sheets' ? 'characters' : $bucket;
+    $relative = ad_safe_storage_relative('storage/' . $targetBucket . '/' . $name);
     $dest = AD_ROOT . '/' . $relative;
+    $dir = dirname($dest);
+    if (!is_dir($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) {
+        throw new RuntimeException('Could not prepare upload directory.');
+    }
     if (!move_uploaded_file($tmp, $dest)) throw new RuntimeException('Could not save upload.');
     @chmod($dest, 0644);
     return [
@@ -32,13 +63,14 @@ function ad_store_upload(array $file, string $bucket): array {
         'mime' => $mime,
         'bytes' => filesize($dest) ?: $size,
         'original_name' => basename((string)($file['name'] ?? $name)),
+        'role' => $role,
     ];
 }
 
 function ad_download_result(string $url, string $jobId): ?array {
     if (!preg_match('#^https://#i', $url)) return null;
     $destName = preg_replace('/[^A-Za-z0-9_-]/', '_', $jobId) . '.mp4';
-    $relative = 'storage/results/' . $destName;
+    $relative = ad_safe_storage_relative('storage/results/' . $destName);
     $dest = AD_ROOT . '/' . $relative;
 
     $ch = curl_init($url);

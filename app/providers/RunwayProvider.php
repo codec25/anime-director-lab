@@ -8,17 +8,39 @@ final class RunwayProvider implements ADProvider {
     public function available(): bool { return ad_mock_mode() || $this->key !== ''; }
     public function estimatedUsd(float $seconds): float { return round(max(3, $seconds) * 0.05, 4); }
 
-    public function submit(array $input): array {
-        if (ad_mock_mode()) return $this->mockSubmit($input);
-        if ($this->key === '') throw new RuntimeException('RUNWAY_API_KEY is not configured.');
-        $duration = max(3, min(30, (int)ceil((float)($input['duration_seconds'] ?? 5))));
-        $payload = [
+    /** @return list<string> */
+    private function allowedRatios(): array {
+        return ['1280:720', '720:1280', '1104:832', '832:1104', '960:960', '1584:672'];
+    }
+
+    private function normalizeRatio(string $ratio): string {
+        return in_array($ratio, $this->allowedRatios(), true) ? $ratio : '1280:720';
+    }
+
+    private function buildPayload(array $input): array {
+        return [
+            'character' => [
+                'type' => 'image',
+                'uri' => (string)($input['character_url'] ?? ''),
+            ],
+            'reference' => [
+                'type' => 'video',
+                'uri' => (string)($input['performance_url'] ?? ''),
+            ],
+            'bodyControl' => true,
+            'expressionIntensity' => 3,
             'model' => 'act_two',
-            'promptImage' => (string)$input['character_url'],
-            'promptPerformance' => (string)$input['performance_url'],
-            'ratio' => (string)($input['ratio'] ?? '1280:720'),
-            'duration' => $duration,
+            'ratio' => $this->normalizeRatio((string)($input['ratio'] ?? '1280:720')),
+            'contentModeration' => [
+                'publicFigureThreshold' => 'auto',
+            ],
         ];
+    }
+
+    public function submit(array $input): array {
+        $payload = $this->buildPayload($input);
+        if (ad_mock_mode()) return $this->mockSubmit($payload);
+        if ($this->key === '') throw new RuntimeException('RUNWAY_API_KEY is not configured.');
         $data = ad_http_json('POST', 'https://api.dev.runwayml.com/v1/character_performance', [
             'Authorization: Bearer ' . $this->key,
             'Content-Type: application/json',
@@ -45,8 +67,8 @@ final class RunwayProvider implements ADProvider {
         return ['status' => in_array($status, ['RUNNING','THROTTLED'], true) ? 'processing' : 'queued', 'raw' => $data];
     }
 
-    private function mockSubmit(array $input): array {
-        return ['external_id' => ad_id('mock_runway'), 'status' => 'submitted', 'raw' => ['mock' => true, 'input' => $input]];
+    private function mockSubmit(array $payload): array {
+        return ['external_id' => ad_id('mock_runway'), 'status' => 'submitted', 'raw' => ['mock' => true, 'payload' => $payload]];
     }
     private function mockPoll(string $externalId): array {
         return ['status' => 'succeeded', 'output_url' => '', 'mock' => true, 'raw' => ['id' => $externalId, 'mock' => true]];
