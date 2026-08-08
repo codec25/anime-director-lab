@@ -41,6 +41,8 @@ A deliberately small, standalone research lab for testing the core Anime Directo
    - `VIDU_API_KEY`
 6. Ensure PHP has cURL + fileinfo enabled and `storage/` + `data/` are writable by PHP.
 
+See `ARCHITECTURE.md` for the foundation data model (Character Bible, performances vs takes, AI Gateway, Anime Boost, scenes).
+
 ## Benchmark order
 
 1. A1 neutral acting
