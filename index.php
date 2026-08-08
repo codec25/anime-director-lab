@@ -37,7 +37,7 @@
     <div><strong id="statPerformances">0</strong><span>performances</span></div>
     <div><strong id="statTakes">0</strong><span>generated takes</span></div>
     <div><strong id="statUsable">0</strong><span>usable</span></div>
-    <div><strong id="statCost">$0</strong><span>est. spend</span></div>
+    <div><strong id="statCost">$0.00</strong><span id="statCostLabel">est. live cost</span></div>
   </div>
 </section>
 
@@ -104,15 +104,15 @@
     <div class="section-title"><span>03</span><div><h3>Create controlled shot</h3><p>ACT IT measures fidelity. DESCRIBE IT is architecture-only. Anime Boost is direction metadata.</p></div></div>
     <form id="shotForm" class="form-card">
       <label>Title<input name="title" placeholder="A1 Neutral hold"></label>
-      <label>Performance<select id="shotPerformance" name="performance_id"></select></label>
+      <label id="shotPerformanceLabel">Performance<select id="shotPerformance" name="performance_id"></select></label>
       <label>Shot intent<textarea name="intent" rows="3" placeholder="Akio steps forward and throws a controlled jab-cross."></textarea></label>
       <label>Direction<textarea name="direction" rows="2" placeholder="Keep eyeline camera-left; no camera move."></textarea></label>
       <div class="row">
-        <label>Generation mode<select name="generation_mode"><option value="ACT_IT">ACT IT</option><option value="DESCRIBE_IT">DESCRIBE IT (future)</option></select></label>
+        <label>Generation mode<select name="generation_mode" id="shotGenerationMode"><option value="ACT_IT">ACT IT</option><option value="DESCRIBE_IT">DESCRIBE IT (future)</option></select></label>
         <label>Camera<input name="camera_direction" placeholder="Medium close-up, static"></label>
       </div>
       <div class="row">
-        <label>Frame<select name="ratio"><option value="1280:720">16:9 Landscape</option><option value="720:1280">9:16 Portrait</option><option value="960:960">1:1 Square</option><option value="1104:832">4:3</option></select></label>
+        <label>Frame<select name="ratio"><option value="1280:720">16:9 Landscape</option><option value="720:1280">9:16 Portrait</option><option value="960:960">1:1 Square</option><option value="1104:832">4:3</option><option value="832:1104">3:4</option><option value="1584:672">21:9</option></select></label>
         <label>Anime Boost<select name="boost"><option value="natural">Natural — fidelity first</option><option value="anime">Anime — stylized amplification</option><option value="extreme">Extreme — stress test</option></select></label>
       </div>
       <button class="btn primary" type="submit">Create shot</button>

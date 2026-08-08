@@ -420,7 +420,10 @@ function ad_benchmark_summary(array $state): array {
                 'scored' => 0, 'cps_sum' => 0.0, 'pps_sum' => 0.0, 'dus_sum' => 0.0, 'estimated_spend' => 0.0,
             ];
         }
-        $byKey[$key]['attempts'] = max($byKey[$key]['attempts'], (int)($job['attempt'] ?? 0));
+        $external = trim((string)($job['provider_job_id'] ?? $job['external_id'] ?? ''));
+        if ($external !== '') {
+            $byKey[$key]['attempts'] = max($byKey[$key]['attempts'], (int)($job['attempt'] ?? 0));
+        }
     }
     foreach ($byKey as $row) {
         $n = max(1, (int)$row['scored']);

@@ -134,3 +134,46 @@ function ad_safe_provider_error(Throwable $e): array {
         'safe_error' => $message,
     ];
 }
+
+function ad_require_live_public_https_url(string $url): void {
+    $url = trim($url);
+    $parts = parse_url($url);
+    $scheme = strtolower((string)($parts['scheme'] ?? ''));
+    $host = strtolower((string)($parts['host'] ?? ''));
+    if (
+        $url === ''
+        || $scheme !== 'https'
+        || $host === ''
+        || $host === 'localhost'
+        || $host === '127.0.0.1'
+        || $host === '[::1]'
+        || $host === '::1'
+    ) {
+        throw new RuntimeException('Live providers require public HTTPS character and performance URLs. Deploy the lab or configure ANIME_DIRECTOR_BASE_URL.');
+    }
+}
+
+/** Live ACT_IT media must be externally fetchable HTTPS URLs. Mock mode skips this. */
+function ad_assert_live_media_urls(string $characterUrl, string $performanceUrl): void {
+    if (ad_mock_mode()) return;
+    ad_require_live_public_https_url($characterUrl);
+    ad_require_live_public_https_url($performanceUrl);
+}
+
+/** Count only provider-accepted jobs (those with a real task id). */
+function ad_provider_accepted_attempts(array $state, string $shotId, string $providerId): int {
+    $count = 0;
+    foreach ($state['jobs'] as $j) {
+        if (($j['shot_id'] ?? '') !== $shotId || ($j['provider'] ?? '') !== $providerId) continue;
+        $external = trim((string)($j['provider_job_id'] ?? $j['external_id'] ?? ''));
+        if ($external !== '') $count++;
+    }
+    return $count;
+}
+
+function ad_shot_has_takes(array $state, string $shotId): bool {
+    foreach ($state['takes'] as $t) {
+        if (($t['shot_id'] ?? '') === $shotId) return true;
+    }
+    return false;
+}

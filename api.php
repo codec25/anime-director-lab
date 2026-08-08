@@ -118,7 +118,10 @@ try {
     if ($action === 'upload-performance' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($_FILES['video'])) ad_json(['ok' => false, 'error' => 'Performance video is required.'], 422);
         $asset = ad_store_upload($_FILES['video'], 'performances');
-        $duration = max(0.1, min(30, (float)($_POST['duration_seconds'] ?? 5)));
+        $duration = (float)($_POST['duration_seconds'] ?? 5);
+        if ($duration < 3 || $duration > 30) {
+            ad_json(['ok' => false, 'error' => 'Performance duration must be between 3 and 30 seconds.'], 422);
+        }
         $code = ad_substr(trim((string)($_POST['code'] ?? 'A1')), 0, 20);
         $tests = ad_benchmark_tests();
         $defaultTrack = $tests[$code]['track'] ?? 'acting';
@@ -149,16 +152,22 @@ try {
         $d = ad_json_input();
         $state = ad_state_read();
         if (!$state['character']) ad_json(['ok' => false, 'error' => 'Lock a character first.'], 409);
-        $performanceId = (string)($d['performance_id'] ?? '');
-        $performance = ad_find($state['performances'], $performanceId);
-        if (!$performance) ad_json(['ok' => false, 'error' => 'Choose a valid performance.'], 422);
         $mode = strtoupper((string)($d['generation_mode'] ?? 'ACT_IT'));
         if (!in_array($mode, ['ACT_IT', 'DESCRIBE_IT'], true)) $mode = 'ACT_IT';
+        $performanceId = trim((string)($d['performance_id'] ?? ''));
+        $performance = $performanceId !== '' ? ad_find($state['performances'], $performanceId) : null;
+        if ($mode === 'ACT_IT') {
+            if (!$performance) ad_json(['ok' => false, 'error' => 'Choose a valid performance.'], 422);
+        } else {
+            // DESCRIBE_IT: architecture-only drafts may omit performance.
+            $performanceId = $performance ? (string)$performance['id'] : '';
+        }
         $boost = in_array((string)($d['boost'] ?? $d['anime_boost_mode'] ?? 'natural'), ['natural', 'anime', 'extreme'], true)
             ? (string)($d['boost'] ?? $d['anime_boost_mode'] ?? 'natural') : 'natural';
         $sceneId = (string)($d['scene_id'] ?? ($state['scenes'][0]['id'] ?? 'scene_lab_01'));
         $scene = ad_find($state['scenes'], $sceneId) ?? $state['scenes'][0];
         $number = count($state['shots']) + 1;
+        $intentDefault = $performance['label'] ?? 'Described shot';
         $shot = ad_normalize_shot([
             'id' => ad_id('shot'),
             'scene_id' => (string)$scene['id'],
@@ -168,10 +177,10 @@ try {
             'character_id' => $state['character']['id'],
             'character_version_ids' => [$state['character']['id']],
             'performance_id' => $performanceId,
-            'intent' => ad_substr(trim((string)($d['intent'] ?? $performance['label'])), 0, 600),
+            'intent' => ad_substr(trim((string)($d['intent'] ?? $intentDefault)), 0, 600),
             'direction' => ad_substr(trim((string)($d['direction'] ?? '')), 0, 1000),
             'camera_direction' => ad_substr(trim((string)($d['camera_direction'] ?? '')), 0, 400),
-            'duration_target' => (float)($d['duration_target'] ?? $performance['duration_seconds'] ?? 5),
+            'duration_target' => (float)($d['duration_target'] ?? ($performance['duration_seconds'] ?? 5)),
             'ratio' => (string)($d['ratio'] ?? $d['framing'] ?? '1280:720'),
             'generation_mode' => $mode,
             'anime_boost_mode' => $boost,
@@ -214,13 +223,20 @@ try {
         if (!$meta || empty($meta['implemented'])) ad_json(['ok' => false, 'error' => 'Provider is not implemented.'], 409);
         $provider = ad_provider($providerId);
         if (!$provider->available()) ad_json(['ok' => false, 'error' => 'Provider key is not configured.'], 409);
-        $attempt = 1;
-        foreach ($state['jobs'] as $j) {
-            if (($j['shot_id'] ?? '') === $shot['id'] && ($j['provider'] ?? '') === $providerId) {
-                $attempt = max($attempt, (int)($j['attempt'] ?? 0) + 1);
-            }
+
+        $characterUrl = ad_character_master_url($character);
+        if ($characterUrl === '') ad_json(['ok' => false, 'error' => 'Character master_front reference is required.'], 409);
+        $performanceUrl = (string)($performance['asset']['url'] ?? '');
+        try {
+            ad_assert_live_media_urls($characterUrl, $performanceUrl);
+        } catch (Throwable $e) {
+            // Preflight failures must not create/count a generation attempt.
+            ad_json(['ok' => false, 'error' => $e->getMessage()], 409);
         }
-        if ($attempt > 3) ad_json(['ok' => false, 'error' => 'Benchmark limit reached: maximum 3 attempts per provider per shot.'], 409);
+
+        $accepted = ad_provider_accepted_attempts($state, (string)$shot['id'], $providerId);
+        if ($accepted >= 3) ad_json(['ok' => false, 'error' => 'Benchmark limit reached: maximum 3 attempts per provider per shot.'], 409);
+        $attempt = $accepted + 1;
         $jobId = ad_id('job');
         $job = ad_normalize_job([
             'id' => $jobId,
@@ -254,23 +270,23 @@ try {
             return $state;
         });
         try {
-            $characterUrl = ad_character_master_url($character);
-            if ($characterUrl === '') throw new RuntimeException('Character master_front reference is required.');
             $submitted = $provider->submit([
                 'job_id' => $jobId,
                 'character_url' => $characterUrl,
-                'performance_url' => (string)$performance['asset']['url'],
+                'performance_url' => $performanceUrl,
                 'duration_seconds' => $performance['duration_seconds'],
                 'ratio' => $shot['ratio'],
                 'anime_boost' => $shot['anime_boost_mode'],
                 'anime_boost_direction' => $shot['anime_boost'],
             ]);
-            ad_state_mutate(function(array $state) use ($jobId, $submitted): array {
+            $external = trim((string)($submitted['external_id'] ?? ''));
+            if ($external === '') throw new RuntimeException('Provider returned no task id.');
+            ad_state_mutate(function(array $state) use ($jobId, $submitted, $external, $attempt): array {
                 foreach ($state['jobs'] as &$j) {
                     if ($j['id'] !== $jobId) continue;
-                    $external = (string)($submitted['external_id'] ?? '');
                     $j['external_id'] = $external;
                     $j['provider_job_id'] = $external;
+                    $j['attempt'] = $attempt;
                     $j['status'] = 'queued';
                     $j['raw'] = $submitted['raw'] ?? null;
                     $j['metadata'] = $submitted['raw'] ?? null;
@@ -284,8 +300,14 @@ try {
         } catch (Throwable $e) {
             $safe = ad_safe_provider_error($e);
             ad_state_mutate(function(array $state) use ($jobId, $safe): array {
+                $shotId = '';
                 foreach ($state['jobs'] as &$j) {
                     if ($j['id'] !== $jobId) continue;
+                    // No provider task id => does not consume a benchmark attempt.
+                    $shotId = (string)$j['shot_id'];
+                    $j['attempt'] = 0;
+                    $j['external_id'] = '';
+                    $j['provider_job_id'] = '';
                     $j['status'] = 'failed';
                     $j['error'] = $safe['safe_error'];
                     $j['safe_error'] = $safe['safe_error'];
@@ -295,6 +317,13 @@ try {
                     break;
                 }
                 unset($j);
+                foreach ($state['shots'] as &$s) {
+                    if (($s['id'] ?? '') !== $shotId) continue;
+                    $s['status'] = 'ready';
+                    $s['updated_at'] = ad_now();
+                    break;
+                }
+                unset($s);
                 return $state;
             });
             ad_json(['ok' => false, 'error' => $safe['safe_error'], 'job_id' => $jobId], 502);
@@ -319,8 +348,15 @@ try {
             foreach ($state['jobs'] as &$j) {
                 if ($j['id'] !== $jobId) continue;
                 $j['status'] = $status;
-                $j['raw'] = $result['raw'] ?? $j['raw'];
-                $j['metadata'] = $result['raw'] ?? $j['metadata'];
+                $submitPayload = null;
+                if (is_array($j['metadata'] ?? null) && isset($j['metadata']['payload'])) $submitPayload = $j['metadata']['payload'];
+                elseif (is_array($j['raw'] ?? null) && isset($j['raw']['payload'])) $submitPayload = $j['raw']['payload'];
+                $pollRaw = is_array($result['raw'] ?? null) ? $result['raw'] : null;
+                $j['raw'] = $pollRaw ?? $j['raw'];
+                $meta = is_array($j['metadata'] ?? null) ? $j['metadata'] : [];
+                if ($pollRaw !== null) $meta['poll'] = $pollRaw;
+                if ($submitPayload !== null) $meta['payload'] = $submitPayload;
+                $j['metadata'] = $meta;
                 if (isset($result['error'])) {
                     $j['error'] = ad_substr((string)$result['error'], 0, 500);
                     $j['safe_error'] = $j['error'];
@@ -334,6 +370,18 @@ try {
                 break;
             }
             unset($j);
+            if ($status === 'failed') {
+                $jobRow = ad_find($state['jobs'], $jobId);
+                $shotId = (string)($jobRow['shot_id'] ?? '');
+                $hasTakes = ad_shot_has_takes($state, $shotId);
+                foreach ($state['shots'] as &$s) {
+                    if (($s['id'] ?? '') !== $shotId) continue;
+                    $s['status'] = $hasTakes ? 'review' : 'ready';
+                    $s['updated_at'] = ad_now();
+                    break;
+                }
+                unset($s);
+            }
             if ($status === 'completed') {
                 foreach ($state['takes'] as $existing) {
                     if (($existing['job_id'] ?? $existing['generation_job_id'] ?? '') === $jobId) {

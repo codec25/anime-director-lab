@@ -38,9 +38,18 @@ function ad_default_state(): array {
 function ad_state_read(): array {
     $path = ad_state_path();
     if (!is_file($path)) return ad_normalize_state(ad_default_state());
-    $raw = file_get_contents($path);
-    $data = is_string($raw) ? json_decode($raw, true) : null;
-    return ad_normalize_state(is_array($data) ? $data : ad_default_state());
+    $handle = fopen($path, 'rb');
+    if (!$handle) return ad_normalize_state(ad_default_state());
+    try {
+        if (!flock($handle, LOCK_SH)) throw new RuntimeException('Unable to lock lab state for reading.');
+        rewind($handle);
+        $raw = stream_get_contents($handle);
+        $data = (is_string($raw) && trim($raw) !== '') ? json_decode($raw, true) : null;
+        return ad_normalize_state(is_array($data) ? $data : ad_default_state());
+    } finally {
+        flock($handle, LOCK_UN);
+        fclose($handle);
+    }
 }
 
 function ad_state_mutate(callable $mutator): array {
