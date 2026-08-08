@@ -1,0 +1,8 @@
+.env
+data/lab.json
+storage/characters/*
+!storage/characters/.gitkeep
+storage/performances/*
+!storage/performances/.gitkeep
+storage/results/*
+!storage/results/.gitkeep
