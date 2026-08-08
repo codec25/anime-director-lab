@@ -357,26 +357,7 @@ function ad_normalize_state(array $state): array {
 function ad_benchmark_summary(array $state): array {
     $rows = [];
     $byKey = [];
-    foreach ($state['takes'] as $take) {
-        $job = null;
-        foreach ($state['jobs'] as $j) {
-            if (($j['id'] ?? '') === ($take['generation_job_id'] ?? $take['job_id'] ?? '')) { $job = $j; break; }
-        }
-        $shot = null;
-        foreach ($state['shots'] as $s) {
-            if (($s['id'] ?? '') === ($take['shot_id'] ?? '')) { $shot = $s; break; }
-        }
-        $perf = null;
-        $perfId = (string)($take['performance_id'] ?? $shot['performance_id'] ?? '');
-        foreach ($state['performances'] as $p) {
-            if (($p['id'] ?? '') === $perfId) { $perf = $p; break; }
-        }
-        $score = null;
-        foreach ($state['scores'] as $sc) {
-            if (($sc['take_id'] ?? '') === ($take['id'] ?? '')) { $score = $sc; break; }
-        }
-        $provider = (string)($take['provider'] ?? $job['provider'] ?? 'unknown');
-        $test = (string)($perf['benchmark_test_id'] ?? $perf['code'] ?? '—');
+    $ensure = static function(array &$byKey, string $provider, string $test) : string {
         $key = $provider . '|' . $test;
         if (!isset($byKey[$key])) {
             $byKey[$key] = [
@@ -391,8 +372,33 @@ function ad_benchmark_summary(array $state): array {
                 'estimated_spend' => 0.0,
             ];
         }
+        return $key;
+    };
+
+    // Scores / usable takes from scored results.
+    foreach ($state['takes'] as $take) {
+        $job = null;
+        foreach ($state['jobs'] as $j) {
+            if (($j['id'] ?? '') === ($take['generation_job_id'] ?? $take['job_id'] ?? '')) { $job = $j; break; }
+        }
+        $shot = null;
+        foreach ($state['shots'] as $s) {
+            if (($s['id'] ?? '') === ($take['shot_id'] ?? '')) { $shot = $s; break; }
+        }
+        $perf = null;
+        $perfId = trim((string)($take['performance_id'] ?? ''));
+        if ($perfId === '') $perfId = trim((string)($shot['performance_id'] ?? ''));
+        foreach ($state['performances'] as $p) {
+            if (($p['id'] ?? '') === $perfId) { $perf = $p; break; }
+        }
+        $score = null;
+        foreach ($state['scores'] as $sc) {
+            if (($sc['take_id'] ?? '') === ($take['id'] ?? '')) { $score = $sc; break; }
+        }
+        $provider = (string)($take['provider'] ?? $job['provider'] ?? 'unknown');
+        $test = (string)($perf['benchmark_test_id'] ?? $perf['code'] ?? '—');
+        $key = $ensure($byKey, $provider, $test);
         $byKey[$key]['attempts'] = max($byKey[$key]['attempts'], (int)($take['attempt'] ?? $job['attempt'] ?? 0));
-        if ($job) $byKey[$key]['estimated_spend'] += (float)($job['estimated_cost_usd'] ?? 0);
         if ($score) {
             $byKey[$key]['scored']++;
             $byKey[$key]['cps_sum'] += (float)$score['cps'];
@@ -401,32 +407,31 @@ function ad_benchmark_summary(array $state): array {
             if (!empty($score['usable'])) $byKey[$key]['usable_takes']++;
         }
     }
-    // Also count jobs without takes for spend/attempts.
+
+    // Economics: each provider-accepted job counted once (including failed jobs with a task id).
     foreach ($state['jobs'] as $job) {
+        $external = trim((string)($job['provider_job_id'] ?? $job['external_id'] ?? ''));
+        if ($external === '') continue; // rejected before task id => $0
         $shot = null;
         foreach ($state['shots'] as $s) {
             if (($s['id'] ?? '') === ($job['shot_id'] ?? '')) { $shot = $s; break; }
         }
         $perf = null;
+        $perfId = trim((string)($job['performance_id'] ?? ''));
+        if ($perfId === '') $perfId = trim((string)($shot['performance_id'] ?? ''));
         foreach ($state['performances'] as $p) {
-            if (($p['id'] ?? '') === (string)($job['performance_id'] ?? $shot['performance_id'] ?? '')) { $perf = $p; break; }
+            if (($p['id'] ?? '') === $perfId) { $perf = $p; break; }
         }
         $provider = (string)($job['provider'] ?? 'unknown');
         $test = (string)($perf['benchmark_test_id'] ?? $perf['code'] ?? '—');
-        $key = $provider . '|' . $test;
-        if (!isset($byKey[$key])) {
-            $byKey[$key] = [
-                'provider' => $provider, 'test' => $test, 'attempts' => 0, 'usable_takes' => 0,
-                'scored' => 0, 'cps_sum' => 0.0, 'pps_sum' => 0.0, 'dus_sum' => 0.0, 'estimated_spend' => 0.0,
-            ];
-        }
-        $external = trim((string)($job['provider_job_id'] ?? $job['external_id'] ?? ''));
-        if ($external !== '') {
-            $byKey[$key]['attempts'] = max($byKey[$key]['attempts'], (int)($job['attempt'] ?? 0));
-        }
+        $key = $ensure($byKey, $provider, $test);
+        $byKey[$key]['attempts'] = max($byKey[$key]['attempts'], (int)($job['attempt'] ?? 0));
+        $byKey[$key]['estimated_spend'] += (float)($job['estimated_cost_usd'] ?? 0);
     }
+
     foreach ($byKey as $row) {
         $n = max(1, (int)$row['scored']);
+        $spend = (float)$row['estimated_spend'];
         $rows[] = [
             'provider' => $row['provider'],
             'test' => $row['test'],
@@ -435,9 +440,9 @@ function ad_benchmark_summary(array $state): array {
             'average_cps' => $row['scored'] ? round($row['cps_sum'] / $n, 2) : null,
             'average_pps' => $row['scored'] ? round($row['pps_sum'] / $n, 2) : null,
             'average_dus' => $row['scored'] ? round($row['dus_sum'] / $n, 2) : null,
-            'estimated_spend' => round((float)$row['estimated_spend'], 4),
+            'estimated_spend' => round($spend, 4),
             'cost_per_accepted_take' => $row['usable_takes'] > 0
-                ? round($row['estimated_spend'] / $row['usable_takes'], 4)
+                ? round($spend / $row['usable_takes'], 4)
                 : null,
         ];
     }

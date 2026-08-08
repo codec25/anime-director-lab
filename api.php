@@ -117,11 +117,11 @@ try {
 
     if ($action === 'upload-performance' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($_FILES['video'])) ad_json(['ok' => false, 'error' => 'Performance video is required.'], 422);
-        $asset = ad_store_upload($_FILES['video'], 'performances');
         $duration = (float)($_POST['duration_seconds'] ?? 5);
         if ($duration < 3 || $duration > 30) {
             ad_json(['ok' => false, 'error' => 'Performance duration must be between 3 and 30 seconds.'], 422);
         }
+        $asset = ad_store_upload($_FILES['video'], 'performances');
         $code = ad_substr(trim((string)($_POST['code'] ?? 'A1')), 0, 20);
         $tests = ad_benchmark_tests();
         $defaultTrack = $tests[$code]['track'] ?? 'acting';

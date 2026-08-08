@@ -62,7 +62,7 @@
       <div class="row"><label>Name<input name="name" value="Akio" required></label><label>Version<input name="version" value="v1" required></label></div>
       <label>Canonical style<input name="canonical_style" value="Clean modern anime, grounded proportions"></label>
       <label>Description<textarea name="description" rows="2">AKIO-v1 — persistent original anime character for ACT IT benchmarks.</textarea></label>
-      <div class="row"><label>Body / build<textarea name="body_notes" rows="2">Lean athletic teen build.</textarea></label><label>Facial identity<textarea name="facial_notes" rows="2">Sharp jaw, amber eyes, composed expression.</textarea></label></div>
+      <div class="row"><label>Body / build<textarea name="body_notes" rows="2">Lean athletic young adult build.</textarea></label><label>Facial identity<textarea name="facial_notes" rows="2">Sharp jaw, amber eyes, composed expression.</textarea></label></div>
       <div class="row"><label>Hairstyle<textarea name="hairstyle_notes" rows="2">Dark hair with one silver streak.</textarea></label><label>Eyes / color<textarea name="eye_notes" rows="2">Amber irises.</textarea></label></div>
       <div class="row"><label>Outfit<textarea name="outfit_notes" rows="2">Navy jacket, red sleeve accent, black pants, simple shoes.</textarea></label><label>Movement personality<textarea name="movement_notes" rows="2">Controlled, precise, slight coiled energy.</textarea></label></div>
       <label>Voice notes<textarea name="voice_notes" rows="2">Calm mid tone; reserved until action beats.</textarea></label>
