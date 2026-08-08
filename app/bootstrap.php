@@ -5,6 +5,20 @@ define('AD_ROOT', dirname(__DIR__));
 define('AD_DATA_DIR', AD_ROOT . '/data');
 define('AD_STORAGE_DIR', AD_ROOT . '/storage');
 
+function ad_ensure_runtime_dirs(): void {
+    foreach ([
+        AD_DATA_DIR,
+        AD_STORAGE_DIR . '/characters',
+        AD_STORAGE_DIR . '/performances',
+        AD_STORAGE_DIR . '/results',
+    ] as $dir) {
+        if (!is_dir($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) {
+            throw new RuntimeException('Unable to create runtime directory: ' . $dir);
+        }
+    }
+}
+ad_ensure_runtime_dirs();
+
 function ad_load_env(): void {
     $path = AD_ROOT . '/.env';
     if (!is_readable($path)) return;
