@@ -2,4 +2,3 @@
 <FilesMatch "\.(?i:php|phtml|php3|php4|php5|php7|phps|phar|cgi|pl|py|asp|aspx|jsp|sh)$">
   Require all denied
 </FilesMatch>
-php_flag engine off
