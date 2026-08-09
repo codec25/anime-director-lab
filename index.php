@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Anime Director Lab 0.01</title>
-<link rel="stylesheet" href="assets/css/app.css?v=002">
+<link rel="stylesheet" href="assets/css/app.css?v=003">
 </head>
 <body>
 <div class="shell">
@@ -27,6 +27,7 @@
 </nav>
 
 <main>
+<div class="mobile-studio-bar" aria-hidden="true"><button type="button" data-mobile-back>‹</button><div><strong>AKIO Director</strong><span>Live workspace</span></div><button type="button" class="mobile-export" data-jump="scene">Preview</button></div>
 <section class="hero panel">
   <div>
     <span class="kicker">THE AKIO TEST</span>
@@ -152,6 +153,6 @@
 <footer><span>Anime Director Lab 0.01 Foundation</span><span>SHORTS remains a separate product.</span></footer>
 </div>
 <script>window.AD_CONFIG={mock:<?= ad_mock_mode() ? 'true' : 'false' ?>};</script>
-<script src="assets/js/app.js?v=003"></script>
+<script src="assets/js/app.js?v=004"></script>
 </body>
 </html>
