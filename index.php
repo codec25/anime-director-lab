@@ -152,6 +152,6 @@
 <footer><span>Anime Director Lab 0.01 Foundation</span><span>SHORTS remains a separate product.</span></footer>
 </div>
 <script>window.AD_CONFIG={mock:<?= ad_mock_mode() ? 'true' : 'false' ?>};</script>
-<script src="assets/js/app.js?v=002"></script>
+<script src="assets/js/app.js?v=003"></script>
 </body>
 </html>
