@@ -72,10 +72,17 @@ function ad_download_result(string $url, string $jobId): ?array {
     $destName = preg_replace('/[^A-Za-z0-9_-]/', '_', $jobId) . '.mp4';
     $relative = ad_safe_storage_relative('storage/results/' . $destName);
     $dest = AD_ROOT . '/' . $relative;
+    $partial = $dest . '.part';
+
+    // A prior successful retry is already durable; do not download it twice.
+    if (is_file($dest) && (int)filesize($dest) >= 1024) {
+        return ['path' => $relative, 'url' => ad_public_media_url($relative), 'bytes' => (int)filesize($dest), 'mime' => 'video/mp4'];
+    }
 
     $ch = curl_init($url);
-    $fh = fopen($dest, 'wb');
-    if (!$ch || !$fh) return null;
+    if (!$ch) return null;
+    $fh = fopen($partial, 'wb');
+    if (!$fh) { curl_close($ch); return null; }
     $written = 0;
     curl_setopt_array($ch, [
         CURLOPT_FOLLOWLOCATION => true,
@@ -94,7 +101,9 @@ function ad_download_result(string $url, string $jobId): ?array {
     $type = (string)curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
     curl_close($ch); fclose($fh);
     if (!$ok || $code < 200 || $code >= 300 || $written < 1024 || (!str_contains(strtolower($type), 'video') && !str_contains(strtolower($type), 'octet-stream'))) {
-        @unlink($dest); return null;
+        @unlink($partial); return null;
     }
+    if (!rename($partial, $dest)) { @unlink($partial); return null; }
+    @chmod($dest, 0644);
     return ['path' => $relative, 'url' => ad_public_media_url($relative), 'bytes' => $written, 'mime' => $type ?: 'video/mp4'];
 }

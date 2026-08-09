@@ -41,6 +41,20 @@ A deliberately small, standalone research lab for testing the core Anime Directo
    - `VIDU_API_KEY`
 6. Ensure PHP has cURL + fileinfo enabled and `storage/` + `data/` are writable by PHP.
 
+## First live directed take
+
+Use this checklist for the first controlled Runway Act-Two test:
+
+1. Deploy the app over HTTPS and set `ANIME_DIRECTOR_BASE_URL` to its public URL.
+2. Keep `ANIME_DIRECTOR_MOCK_MODE=1` while you lock the character and verify uploads.
+3. Add `RUNWAY_API_KEY` only to the server environment, then switch `ANIME_DIRECTOR_MOCK_MODE=0` when you are ready for one paid attempt.
+4. Upload a clear character reference and a 3–5 second A1 neutral-acting performance.
+5. Create one `ACT_IT` shot and click **Runway ACT IT** once. The browser monitors the submitted job automatically; it does not submit automatic retries or extra generations.
+6. Leave the page open while the job runs. If monitoring pauses, use **Resume monitoring** on the same job.
+7. The app saves a completed result into `storage/results/` before creating a take. Score it, mark it usable if appropriate, and choose it for the scene.
+
+If remote generation completes but the result file cannot be captured immediately, the existing job stays recoverable and is retried without creating another paid generation attempt.
+
 See `ARCHITECTURE.md` for the foundation data model (Character Bible, performances vs takes, AI Gateway, Anime Boost, scenes).
 
 ## Benchmark order

@@ -336,15 +336,39 @@ try {
         $state = ad_state_read();
         $job = ad_find($state['jobs'], $jobId);
         if (!$job) ad_json(['ok' => false, 'error' => 'Job not found.'], 404);
-        if (in_array($job['status'], ['completed', 'failed', 'cancelled', 'succeeded'], true)) {
+        if (in_array($job['status'], ['failed', 'cancelled'], true)) {
             ad_json(['ok' => true, 'job' => ad_normalize_job($job), 'status' => ad_normalize_job($job)['status']]);
+        }
+        if (in_array($job['status'], ['completed', 'succeeded'], true)) {
+            foreach ($state['takes'] as $existingTake) {
+                if (($existingTake['job_id'] ?? $existingTake['generation_job_id'] ?? '') === $jobId) {
+                    ad_json(['ok' => true, 'job' => ad_normalize_job($job), 'status' => 'completed', 'take' => ad_normalize_take($existingTake)]);
+                }
+            }
+            // A legacy/interrupted completed job without a take is recoverable by polling again.
         }
         $provider = ad_provider((string)$job['provider']);
         $result = $provider->poll((string)($job['provider_job_id'] ?: $job['external_id']));
         $take = null;
         $status = (string)($result['status'] ?? 'processing');
         if ($status === 'succeeded') $status = 'completed';
-        ad_state_mutate(function(array $state) use ($jobId, $result, $status, &$take): array {
+        $remote = trim((string)($result['output_url'] ?? ''));
+        $local = null;
+        $downloadError = null;
+        if ($status === 'completed' && !ad_mock_mode()) {
+            if ($remote === '') {
+                $status = 'failed';
+                $result['error'] = 'Provider completed without a usable output URL.';
+            } else {
+                // Network/file work must happen outside the state lock. A failed capture is retryable.
+                $local = ad_download_result($remote, $jobId);
+                if ($local === null) {
+                    $status = 'processing';
+                    $downloadError = 'Provider completed, but the result could not be saved locally yet. Retrying automatically.';
+                }
+            }
+        }
+        ad_state_mutate(function(array $state) use ($jobId, $result, $status, $remote, $local, $downloadError, &$take): array {
             foreach ($state['jobs'] as &$j) {
                 if ($j['id'] !== $jobId) continue;
                 $j['status'] = $status;
@@ -356,6 +380,16 @@ try {
                 $meta = is_array($j['metadata'] ?? null) ? $j['metadata'] : [];
                 if ($pollRaw !== null) $meta['poll'] = $pollRaw;
                 if ($submitPayload !== null) $meta['payload'] = $submitPayload;
+                if ($downloadError !== null) {
+                    $capture = is_array($meta['result_capture'] ?? null) ? $meta['result_capture'] : [];
+                    $capture['attempts'] = (int)($capture['attempts'] ?? 0) + 1;
+                    $capture['last_error'] = $downloadError;
+                    $capture['last_attempt_at'] = ad_now();
+                    $capture['remote_url'] = $remote;
+                    $meta['result_capture'] = $capture;
+                } elseif ($status === 'completed') {
+                    $meta['result_capture'] = ['status' => 'saved', 'saved_at' => ad_now(), 'remote_url' => $remote];
+                }
                 $j['metadata'] = $meta;
                 if (isset($result['error'])) {
                     $j['error'] = ad_substr((string)$result['error'], 0, 500);
@@ -390,9 +424,6 @@ try {
                     }
                 }
                 $jobRow = ad_find($state['jobs'], $jobId);
-                $remote = (string)($result['output_url'] ?? '');
-                $local = null;
-                if ($remote !== '' && !ad_mock_mode()) $local = ad_download_result($remote, $jobId);
                 $registry = ad_provider_registry();
                 $take = ad_normalize_take([
                     'id' => ad_id('take'),
@@ -420,7 +451,14 @@ try {
             }
             return $state;
         });
-        ad_json(['ok' => true, 'status' => $status, 'take' => $take]);
+        ad_json([
+            'ok' => true,
+            'status' => $status,
+            'take' => $take,
+            'capture_pending' => $downloadError !== null,
+            'message' => $downloadError,
+            'retry_after_ms' => in_array($status, ['queued', 'submitted', 'processing'], true) ? 5000 : null,
+        ]);
     }
 
     if ($action === 'score' && $_SERVER['REQUEST_METHOD'] === 'POST') {
