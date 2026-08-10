@@ -2,8 +2,15 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Anime Director Lab 0.01</title>
+<meta name="theme-color" content="#111214">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Anime Director">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icons/anime-director.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/icons/anime-director-180.png">
 <link rel="stylesheet" href="assets/css/app.css?v=003">
 </head>
 <body>
@@ -152,7 +159,8 @@
 </main>
 <footer><span>Anime Director Lab 0.01 Foundation</span><span>SHORTS remains a separate product.</span></footer>
 </div>
-<script>window.AD_CONFIG={mock:<?= ad_mock_mode() ? 'true' : 'false' ?>};</script>
+<script>window.AD_CONFIG={mock:<?= ad_mock_mode() ? 'true' : 'false' ?>,apiBase:''};</script>
+<script src="assets/js/platform.js?v=001"></script>
 <script src="assets/js/app.js?v=004"></script>
 </body>
 </html>

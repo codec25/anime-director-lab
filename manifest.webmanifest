@@ -1,0 +1,15 @@
+{
+  "name": "Anime Director Lab",
+  "short_name": "Anime Director",
+  "description": "Perform it. Direct it. Animate it.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b0c0f",
+  "theme_color": "#111214",
+  "orientation": "any",
+  "icons": [
+    {"src": "assets/icons/anime-director.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"},
+    {"src": "assets/icons/anime-director-180.png", "sizes": "180x180", "type": "image/png"}
+  ]
+}
