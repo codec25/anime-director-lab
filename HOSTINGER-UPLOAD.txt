@@ -2,6 +2,7 @@ Anime Director — current branch upload map
 
 Canonical creator product:
 - continue-api.php
+- dialogue-api.php
 - director-api.php
 - director.php
 - index.php
@@ -12,10 +13,12 @@ Canonical creator product:
 - world-api.php
 
 Frontend:
+- assets/css/dialogue.css
 - assets/css/director.css
 - assets/css/scene-memory.css
 - assets/css/semantic-references.css
 - assets/css/world-memory.css
+- assets/js/dialogue.js
 - assets/js/director.js
 - assets/js/scene-memory.js
 - assets/js/semantic-references.js
@@ -57,6 +60,9 @@ Live provider requirements:
 - Scene Memory overrides only filled fields; empty scene fields inherit World Memory.
 - Location Presets are reusable copies; applying one does not create a live link back to the preset.
 - New shots are bound to the currently active scene and inherit its scene references/environment plates.
+- Voice Memory uses Runway Seed Audio through the same server-side Runway key. A reference voice clip is optional but must be audio you own or have permission to use.
+- Generated dialogue is stored as a semantic `voice` reference on the shot so reference-aware video generation can use the spoken performance as context.
+- Exact mouth/facial performance remains the ACT IT path because Runway deprecated standalone Lip Sync in favor of Act-Two.
 - Native continuation uses the previous generated video and requires a provider-fetchable public HTTPS URL.
 - Seedance 2.5 input/reference videos must be at least 480p.
 
