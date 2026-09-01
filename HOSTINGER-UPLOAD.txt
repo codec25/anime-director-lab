@@ -1,22 +1,27 @@
 Anime Director — current branch upload map
 
 Canonical creator product:
-- index.php
-- director.php
-- director-api.php
 - continue-api.php
+- director-api.php
+- director.php
+- index.php
 - lab.php
+- reference-api.php
+- world-api.php
 
 Frontend:
 - assets/css/director.css
+- assets/css/world-memory.css
 - assets/js/director.js
+- assets/js/world-memory.js
 
 Backend additions/changes:
 - app/bootstrap.php
 - app/gateway.php
 - app/storage.php
-- app/providers/RunwayDescribeProvider.php
 - app/providers/RunwayContinueProvider.php
+- app/providers/RunwayDescribeProvider.php
+- app/providers/RunwayReferenceProvider.php
 
 Server routing/docs:
 - .htaccess
@@ -39,8 +44,10 @@ Live provider requirements:
 - RUNWAY_API_KEY=...
 - ANIME_DIRECTOR_BASE_URL must point to the public HTTPS app URL.
 - ANIME_DIRECTOR_MOCK_MODE=0 for live generation.
+- World/shot image, video and audio references must be provider-fetchable public HTTPS URLs.
+- Seedance 2.5 native reference generation is the preferred path when World Memory or shot references are active.
 - Native continuation uses the previous generated video and requires a provider-fetchable public HTTPS URL.
-- Seedance 2.5 continuation input video must be at least 480p.
+- Seedance 2.5 input/reference videos must be at least 480p.
 
 Routing after upload:
 / -> index.php -> director.php
