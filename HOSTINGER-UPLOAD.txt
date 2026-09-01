@@ -21,6 +21,7 @@ Frontend:
 - assets/css/continuity-review.css
 - assets/css/dialogue.css
 - assets/css/director.css
+- assets/css/production-stages.css
 - assets/css/scene-memory.css
 - assets/css/semantic-references.css
 - assets/css/sound-design.css
@@ -30,6 +31,7 @@ Frontend:
 - assets/js/continuity-review.js
 - assets/js/dialogue.js
 - assets/js/director.js
+- assets/js/production-stages.js
 - assets/js/scene-memory.js
 - assets/js/semantic-references.js
 - assets/js/sound-design.js
@@ -65,36 +67,37 @@ Existing shared files still required on the server:
 
 Do not upload `.env` from Git. Keep provider keys server-side.
 
+Director UX:
+- Main Director is intentionally organized into four stages: Direct, Perform, Review, Finish.
+- Direct contains prompt/shot creation plus World/Scene Memory.
+- Perform contains Cast + Voices and the same shot cards so Dialogue / Precision passes remain contextual.
+- Review contains Continuity Review + Sound Design.
+- Finish contains the Director Timeline + export.
+- The former capability showcase and decorative memory cards were removed from the main page to avoid feature stacking; underlying APIs remain intact.
+
 Live provider requirements:
 - RUNWAY_API_KEY=...
 - ANIME_DIRECTOR_BASE_URL must point to the public HTTPS app URL.
 - ANIME_DIRECTOR_MOCK_MODE=0 for live generation.
 - World/scene/shot image, video and audio references must be provider-fetchable public HTTPS URLs.
 - Semantic roles available: character, environment, prop, style, motion, voice, sound, reference.
-- Provider reference order is mapped into the generation prompt (Image 1, Video 1, Audio 1, etc.) with the saved semantic role.
-- Seedance 2.5 native reference generation is the preferred path when World Memory or shot references are active.
-- Scene Memory overrides only filled fields; empty scene fields inherit World Memory.
-- Location Presets are reusable copies; applying one does not create a live link back to the preset.
-- New shots are bound to the currently active scene and inherit its scene references/environment plates.
-- Cast + Voices supports multiple recurring characters. The locked Character Bible remains the primary cast member; secondary cast members can store their own identity image and voice reference.
-- Every dialogue line stores speaker_id and speaker_name, so dialogue turn order and generated speech stay assigned to the correct recurring character.
-- Runway Seed Audio is used per dialogue turn. Each generated clip is stored as a semantic `voice` reference with the speaker identity attached.
-- Reference-aware video generation automatically includes identity references for the characters speaking in that shot and labels voice references with the named speaker in the prompt.
-- Precision performance uses the current Runway Act-Two API (`/v1/character_performance`, model `act_two`). Each speaking character gets an independent pass with its own character source and driving performance.
-- Act-Two driving performances must be 3–30 seconds. Character and performance media must be provider-fetchable public HTTPS URLs in live mode.
-- For scene-matched precision work, upload an isolated/cropped character video for each pass. If none is supplied, Anime Director falls back to that cast member's identity image.
-- A shot becomes `ready_to_composite` only after all required Act-Two passes finish. The composite plan keeps the original base take underneath and the per-character passes above it; masking/cropping/feathering remains an explicit verified compositing step rather than unsafe automatic overlap masking.
-- Scene Continuity Review compares generated takes side-by-side and stores per-shot human checks for identity, wardrobe, location, lighting, palette and screen direction.
-- Continuity Review automatically surfaces only metadata facts it can prove: missing takes, scene-memory snapshot drift, dominant aspect-ratio mismatch, unvoiced dialogue and incomplete precision passes. It does not claim visual AI detection unless a real vision-comparison provider is added later.
-- Sound Design is deliberately placed after Continuity Review: keep/fix the picture first, then build editorial audio.
-- Scene Bed stores continuous room tone / ambience for a scene; Music Cue stores scene-level score intent and behavior; Shot SFX/Foley stores timed per-shot sound events.
-- Sound Design uses Runway Seed Audio via `/v1/sound_effect` with `seed_audio`, MP3 output and 48 kHz sample rate. Seed Audio supports rich audio scenes and sound effects; exact final duration/timing is editorial metadata and will be trimmed/looped/crossfaded during final assembly.
-- Generated ambience/music/SFX remain editorial audio assets and are not automatically injected back into visual generation.
-- Director Timeline is the final-assembly layer after Sound Design. It stores shot order, selected takes, trim points, cut/crossfade intent and mix rules for dialogue, scene bed, music and SFX.
-- Timeline export always supports a JSON manifest. If FFmpeg is available to PHP on the server, Anime Director also enables a hard-cut MP4 render from locally downloaded takes.
-- Current server renderer intentionally handles picture assembly only. Crossfades and the full dialogue/ambience/music/SFX mix remain preserved in the manifest until the dedicated FFmpeg mix/render graph is validated on the deployed server.
-- Native continuation uses the previous generated video and requires a provider-fetchable public HTTPS URL.
-- Seedance 2.5 input/reference videos must be at least 480p.
+- Seedance 2.5 native reference generation is preferred when World Memory or shot references are active.
+- Cast + Voices supports multiple recurring characters and per-character voice references.
+- Precision performance uses Runway Act-Two (`/v1/character_performance`, model `act_two`) one speaking character per pass.
+- Scene Continuity Review stores human checks plus deterministic metadata warnings.
+- Sound Design stores Scene Bed, Music Cue and timed Shot SFX/Foley as editorial assets.
+
+Final assembly / FFmpeg:
+- Timeline stores shot order, selected takes, trims, cut/crossfade intent and separate dialogue/ambience/music/SFX mix rules.
+- JSON manifest export always works.
+- Server MP4 render is enabled only when FFmpeg is executable by PHP.
+- Full renderer normalizes picture to the project orientation, applies trims, hard cuts or stored crossfades, and renders H.264/AAC.
+- Dialogue, Scene Bed, Music and SFX are mixed as separate buses.
+- Scene Bed / Music can loop across their scene ranges; SFX use their saved shot-relative timing.
+- Dialogue audio is placed in turn order within each shot when no explicit line timecode exists.
+- Music and ambience are sidechain-ducked under dialogue, then the final mix is limited and master fades are applied.
+- FFprobe is used when available to measure generated audio duration; safe editorial fallbacks are used otherwise.
+- Generated takes/audio must exist locally under the app storage for server rendering.
 
 Routing after upload:
 / -> index.php -> director.php
