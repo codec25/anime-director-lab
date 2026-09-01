@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="assets/css/scene-memory.css?v=001">
 <link rel="stylesheet" href="assets/css/dialogue.css?v=002">
 <link rel="stylesheet" href="assets/css/act-two.css?v=001">
+<link rel="stylesheet" href="assets/css/continuity-review.css?v=001">
 </head>
 <body>
 <div class="director-shell">
@@ -73,5 +74,6 @@
 <script src="assets/js/semantic-references.js?v=001"></script>
 <script src="assets/js/dialogue.js?v=002"></script>
 <script src="assets/js/act-two.js?v=001"></script>
+<script src="assets/js/continuity-review.js?v=001"></script>
 </body>
 </html>
