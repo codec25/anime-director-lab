@@ -1,56 +1,71 @@
 # Anime Director
 
-Anime Director is a Director-first anime filmmaking workspace.
+Anime Director is a Director-first AI anime filmmaking workspace.
 
-The normal creator flow is conversational: describe the scene, action, camera, mood, or change; create a shot; generate takes; keep the character and production context attached. When exact body motion matters, switch to the Advanced workspace and drive the character from a recorded performance.
+The creator describes what should happen, generates a take, then revises or continues the scene while the app keeps character, shot, reference and continuity context underneath.
 
-## Entry points
+## Main workflow
 
-- `index.php` — canonical entry; redirects to Director
-- `director.php` — primary creator UI
-- `lab.php` — advanced character, performance, take, scene, and quality controls
-- `api.php` — shared production API
-- `director-api.php` — describe-to-video generation API
+1. Lock a character in Advanced.
+2. Direct a shot in natural language.
+3. Generate the shot with the configured describe provider.
+4. Review the generated take.
+5. Revise the same shot or continue into the next one.
+6. Add image/video/audio references when needed.
+7. Use ACT IT in Advanced when exact human motion is more important than text prompting.
 
-## Current working paths
+## Product routes
 
-### DIRECT IT
+- `/` → Anime Director entry
+- `/director.php` → primary creator workspace
+- `/lab.php` → Advanced workspace
 
-1. lock a character in Advanced
-2. describe a shot in Director
-3. Anime Director stores it as a production shot
-4. generate a describe-to-video take when the provider is configured
-5. review the take in the same production
+## Current real capabilities
+
+### Natural-language shot generation
+
+Normal directed shots use the `DESCRIBE_SHOT` capability. The current implementation uses Runway Gen-4.5 for text/image-to-video.
+
+### Character continuity
+
+The Character Bible owns the canonical character identity and master references. Provider IDs never become the source of truth for the character.
+
+### Shot references
+
+Each shot can store image, video or audio references. The latest visual image reference can guide normal describe-to-video generation; other references stay attached to the shot for provider integrations that can consume them later.
+
+### Conversational revisions
+
+`Revise` updates the existing shot, stores revision history, keeps unspecified camera/ratio/style settings, and clears the old approval so a fresh take can be generated.
+
+### Native video continuation
+
+`Continue` creates a linked next shot. If the prior shot has a generated take, the next shot can use that actual video as its continuity source through Runway Seedance 2.5 video-to-video `extend`.
+
+This is stronger than carrying only a text prompt: the previous moving video becomes the input to the next generation.
+
+If there is no prior generated take yet, Anime Director tells the creator to generate the source shot first.
 
 ### ACT IT
 
-1. lock a character
-2. upload a performance video
-3. create an ACT IT shot
-4. generate through a supported performance provider
-5. compare/select the generated take
+Advanced retains performance-driven generation for acting, dance, martial movement and other motion where a human performance should drive the character.
 
-## Product principles
+## Provider safety
 
-- Director is the product; Advanced is support tooling
-- character identity is provider-independent
-- shots, jobs, and takes stay attached to one production model
-- paid generation requires explicit action
-- do not show creator-facing controls that do nothing
-- do not pretend planned capabilities are live
-- preserve a path to iPhone/iPad and later native packaging without rebuilding the backend
+Secrets remain in server-side environment variables. The creator must explicitly start paid generation. Accepted paid attempts are capped at three per provider per shot.
 
-## Configuration
+Live Runway setup requires:
 
-Copy `.env.example` to `.env` on the server and configure the provider keys you intend to use. Provider secrets stay server-side.
+```text
+RUNWAY_API_KEY=...
+ANIME_DIRECTOR_BASE_URL=https://your-public-app-url
+ANIME_DIRECTOR_MOCK_MODE=0
+```
 
-For live provider access, uploaded media must be reachable through public HTTPS URLs. Configure `ANIME_DIRECTOR_BASE_URL` when automatic base URL detection is not appropriate.
+Never commit `.env`.
 
-## Next priorities
+## Architecture principle
 
-1. true shot-level image/video reference attachments
-2. conversational revise/edit of an existing shot
-3. continue-shot from a selected take
-4. world/scene continuity memory
-5. dialogue, voice, lip sync, and sound
-6. multi-shot orchestration and export
+The normal creator experience must stay simple. If a control does not perform a real action, it should not appear in Director. Technical diagnostics and provider experimentation belong in Advanced.
+
+See `ARCHITECTURE.md` for the production model and `HOSTINGER-UPLOAD.txt` for deployment files.
