@@ -1,16 +1,13 @@
 <?php
 declare(strict_types=1);
 
-/**
- * AI Gateway — application code requests CAPABILITIES, not raw model names.
- * Secrets stay server-side; the frontend only sees availability/cost metadata.
- */
-
+/** AI Gateway: creator workflows request capabilities, providers stay swappable. */
 function ad_capabilities(): array {
     return [
         'ACT_IT' => 'Preserve a human performance on a locked character.',
         'ANIMATE_SHOT' => 'Animate a shot from approved direction.',
         'DESCRIBE_SHOT' => 'Text/direction-driven shot generation.',
+        'MULTI_REFERENCE' => 'Bind character, world, image, video and audio references into generation.',
         'DIALOGUE' => 'Dialogue-driven performance assist (not wired).',
         'CONTINUE_SHOT' => 'Continue a generated video into the next directed shot.',
         'LIP_SYNC' => 'Lip sync assist (not wired).',
@@ -39,15 +36,26 @@ function ad_provider_registry(): array {
             'capabilities' => ['DESCRIBE_SHOT', 'ANIMATE_SHOT'],
             'model' => 'gen4.5',
             'cost_per_second_usd' => 0.12,
-            'best_for' => 'Natural-language anime shot generation from text or a locked reference image',
-            'limitations' => '2–10s per generation. Text-only is landscape/portrait; image-to-video supports more ratios.',
+            'best_for' => 'Simple natural-language shots from text or one strong visual anchor',
+            'limitations' => '2–10s per generation. Single prompt image path; use Seedance Reference when multiple anchors matter.',
+            'implemented' => true,
+        ],
+        'runway_seedance25_reference' => [
+            'class' => RunwayReferenceProvider::class,
+            'label' => 'Runway Seedance 2.5 Reference',
+            'binding_key' => 'runway',
+            'capabilities' => ['DESCRIBE_SHOT', 'MULTI_REFERENCE', 'ANIMATE_SHOT'],
+            'model' => 'seedance2_5',
+            'cost_per_second_usd' => 0.30,
+            'best_for' => 'Character + environment + motion + audio reference-aware shots',
+            'limitations' => '720p reference path. Up to 30 image, 10 video and 10 audio references; reference video/audio duration limits still apply.',
             'implemented' => true,
         ],
         'runway_seedance25_extend' => [
             'class' => RunwayContinueProvider::class,
             'label' => 'Runway Seedance 2.5 Extend',
             'binding_key' => 'runway',
-            'capabilities' => ['CONTINUE_SHOT', 'ANIMATE_SHOT'],
+            'capabilities' => ['CONTINUE_SHOT', 'MULTI_REFERENCE', 'ANIMATE_SHOT'],
             'model' => 'seedance2_5',
             'cost_per_second_usd' => 0.30,
             'best_for' => 'Native video continuation from the previous generated take',
@@ -95,7 +103,7 @@ function ad_provider_registry(): array {
             'model' => 'Wan2.2-Animate-14B',
             'cost_per_second_usd' => null,
             'best_for' => 'Open-source / local GPU benchmark',
-            'limitations' => 'External GPU runner later — not hosted in this PHP lab.',
+            'limitations' => 'External GPU runner later — not hosted in this PHP app.',
             'implemented' => false,
         ],
     ];
@@ -116,22 +124,11 @@ function ad_gateway_catalog(): array {
         $provider = ad_provider_instance($id);
         $configured = $provider->available();
         $out[] = [
-            'id' => $id,
-            'provider' => $id,
-            'label' => $meta['label'],
-            'binding_key' => $meta['binding_key'],
-            'capabilities' => $meta['capabilities'],
-            'availability' => $configured,
-            'available' => $configured,
-            'estimated_cost_per_second_usd' => $meta['cost_per_second_usd'],
-            'cost_per_second_usd' => $meta['cost_per_second_usd'],
-            'configured' => $configured,
-            'mock' => ad_mock_mode(),
-            'live' => !ad_mock_mode() && $configured && !empty($meta['implemented']),
-            'model' => $meta['model'],
-            'best_for' => $meta['best_for'],
-            'limitations' => $meta['limitations'],
-            'implemented' => (bool)$meta['implemented'],
+            'id'=>$id,'provider'=>$id,'label'=>$meta['label'],'binding_key'=>$meta['binding_key'],
+            'capabilities'=>$meta['capabilities'],'availability'=>$configured,'available'=>$configured,
+            'estimated_cost_per_second_usd'=>$meta['cost_per_second_usd'],'cost_per_second_usd'=>$meta['cost_per_second_usd'],
+            'configured'=>$configured,'mock'=>ad_mock_mode(),'live'=>!ad_mock_mode() && $configured && !empty($meta['implemented']),
+            'model'=>$meta['model'],'best_for'=>$meta['best_for'],'limitations'=>$meta['limitations'],'implemented'=>(bool)$meta['implemented'],
         ];
     }
     return $out;
@@ -145,14 +142,12 @@ function ad_providers_for_capability(string $capability): array {
 function ad_safe_provider_error(Throwable $e): array {
     $message = ad_substr($e->getMessage(), 0, 400);
     $message = preg_replace('/(api[_-]?key|bearer|token|authorization)\s*[:=]\s*\S+/i', '$1=[redacted]', $message) ?? $message;
-    return ['error_code' => 'PROVIDER_ERROR', 'safe_error' => $message];
+    return ['error_code'=>'PROVIDER_ERROR','safe_error'=>$message];
 }
 
 function ad_require_live_public_https_url(string $url): void {
-    $url = trim($url);
-    $parts = parse_url($url);
-    $scheme = strtolower((string)($parts['scheme'] ?? ''));
-    $host = strtolower((string)($parts['host'] ?? ''));
+    $url = trim($url); $parts = parse_url($url);
+    $scheme = strtolower((string)($parts['scheme'] ?? '')); $host = strtolower((string)($parts['host'] ?? ''));
     if ($url === '' || $scheme !== 'https' || $host === '' || $host === 'localhost' || $host === '127.0.0.1' || $host === '[::1]' || $host === '::1') {
         throw new RuntimeException('Live providers require public HTTPS media URLs. Deploy the app or configure ANIME_DIRECTOR_BASE_URL.');
     }
@@ -160,16 +155,14 @@ function ad_require_live_public_https_url(string $url): void {
 
 function ad_assert_live_media_urls(string $characterUrl, string $performanceUrl): void {
     if (ad_mock_mode()) return;
-    ad_require_live_public_https_url($characterUrl);
-    ad_require_live_public_https_url($performanceUrl);
+    ad_require_live_public_https_url($characterUrl); ad_require_live_public_https_url($performanceUrl);
 }
 
 function ad_provider_accepted_attempts(array $state, string $shotId, string $providerId): int {
     $count = 0;
     foreach ($state['jobs'] as $j) {
         if (($j['shot_id'] ?? '') !== $shotId || ($j['provider'] ?? '') !== $providerId) continue;
-        $external = trim((string)($j['provider_job_id'] ?? $j['external_id'] ?? ''));
-        if ($external !== '') $count++;
+        if (trim((string)($j['provider_job_id'] ?? $j['external_id'] ?? '')) !== '') $count++;
     }
     return $count;
 }
