@@ -13,6 +13,7 @@ Canonical creator product:
 - scene-memory-api.php
 - semantic-reference-api.php
 - sound-design-api.php
+- timeline-api.php
 - world-api.php
 
 Frontend:
@@ -23,6 +24,7 @@ Frontend:
 - assets/css/scene-memory.css
 - assets/css/semantic-references.css
 - assets/css/sound-design.css
+- assets/css/timeline.css
 - assets/css/world-memory.css
 - assets/js/act-two.js
 - assets/js/continuity-review.js
@@ -31,6 +33,7 @@ Frontend:
 - assets/js/scene-memory.js
 - assets/js/semantic-references.js
 - assets/js/sound-design.js
+- assets/js/timeline.js
 - assets/js/world-memory.js
 
 Backend additions/changes:
@@ -87,7 +90,9 @@ Live provider requirements:
 - Scene Bed stores continuous room tone / ambience for a scene; Music Cue stores scene-level score intent and behavior; Shot SFX/Foley stores timed per-shot sound events.
 - Sound Design uses Runway Seed Audio via `/v1/sound_effect` with `seed_audio`, MP3 output and 48 kHz sample rate. Seed Audio supports rich audio scenes and sound effects; exact final duration/timing is editorial metadata and will be trimmed/looped/crossfaded during final assembly.
 - Generated ambience/music/SFX remain editorial audio assets and are not automatically injected back into visual generation.
-- Seed Audio is currently billed at 0.25 credits per generated second with a 5-credit minimum per generation according to Runway's API changelog/pricing.
+- Director Timeline is the final-assembly layer after Sound Design. It stores shot order, selected takes, trim points, cut/crossfade intent and mix rules for dialogue, scene bed, music and SFX.
+- Timeline export always supports a JSON manifest. If FFmpeg is available to PHP on the server, Anime Director also enables a hard-cut MP4 render from locally downloaded takes.
+- Current server renderer intentionally handles picture assembly only. Crossfades and the full dialogue/ambience/music/SFX mix remain preserved in the manifest until the dedicated FFmpeg mix/render graph is validated on the deployed server.
 - Native continuation uses the previous generated video and requires a provider-fetchable public HTTPS URL.
 - Seedance 2.5 input/reference videos must be at least 480p.
 
