@@ -1,6 +1,7 @@
 Anime Director — current branch upload map
 
 Canonical creator product:
+- act-two-api.php
 - continue-api.php
 - dialogue-api.php
 - director-api.php
@@ -13,11 +14,13 @@ Canonical creator product:
 - world-api.php
 
 Frontend:
+- assets/css/act-two.css
 - assets/css/dialogue.css
 - assets/css/director.css
 - assets/css/scene-memory.css
 - assets/css/semantic-references.css
 - assets/css/world-memory.css
+- assets/js/act-two.js
 - assets/js/dialogue.js
 - assets/js/director.js
 - assets/js/scene-memory.js
@@ -28,9 +31,13 @@ Backend additions/changes:
 - app/bootstrap.php
 - app/gateway.php
 - app/storage.php
+- app/providers/RunwayActTwoProvider.php
 - app/providers/RunwayContinueProvider.php
 - app/providers/RunwayDescribeProvider.php
 - app/providers/RunwayReferenceProvider.php
+
+CI / repository validation:
+- .github/workflows/ci.yml
 
 Server routing/docs:
 - .htaccess
@@ -64,7 +71,10 @@ Live provider requirements:
 - Every dialogue line stores speaker_id and speaker_name, so dialogue turn order and generated speech stay assigned to the correct recurring character.
 - Runway Seed Audio is used per dialogue turn. Each generated clip is stored as a semantic `voice` reference with the speaker identity attached.
 - Reference-aware video generation automatically includes identity references for the characters speaking in that shot and labels voice references with the named speaker in the prompt.
-- Exact multi-character mouth/facial performance still requires separate ACT IT / Act-Two passes per speaking character. Runway Act-Two currently controls one isolated character at a time; compositing those passes is a later orchestration step.
+- Precision performance uses the current Runway Act-Two API (`/v1/character_performance`, model `act_two`). Each speaking character gets an independent pass with its own character source and driving performance.
+- Act-Two driving performances must be 3–30 seconds. Character and performance media must be provider-fetchable public HTTPS URLs in live mode.
+- For scene-matched precision work, upload an isolated/cropped character video for each pass. If none is supplied, Anime Director falls back to that cast member's identity image.
+- A shot becomes `ready_to_composite` only after all required Act-Two passes finish. The composite plan keeps the original base take underneath and the per-character passes above it; masking/cropping/feathering remains an explicit verified compositing step rather than unsafe automatic overlap masking.
 - Native continuation uses the previous generated video and requires a provider-fetchable public HTTPS URL.
 - Seedance 2.5 input/reference videos must be at least 480p.
 
