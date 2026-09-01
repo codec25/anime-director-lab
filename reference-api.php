@@ -8,22 +8,49 @@ function adref_find(array $items, string $id): ?array { foreach ($items as $item
 function adref_master(?array $character): ?array {
     if (!$character) return null;
     $ref = $character['references']['master_front'] ?? $character['asset'] ?? null;
-    return is_array($ref) ? $ref : null;
+    if (!is_array($ref)) return null;
+    $ref['role'] = 'character';
+    $ref['source_scope'] = 'character';
+    return $ref;
+}
+function adref_default_role(array $r, string $scope): string {
+    $role = strtolower(trim((string)($r['role'] ?? '')));
+    if (in_array($role,['character','environment','prop','style','motion','voice','sound','reference'],true)) return $role;
+    $kind = (string)($r['kind'] ?? '');
+    if ($scope === 'world') return $kind === 'audio' ? 'sound' : 'environment';
+    if ($kind === 'video') return 'motion';
+    if ($kind === 'audio') return 'sound';
+    return 'reference';
 }
 function adref_collect(array $state, array $shot): array {
     $images=[]; $videos=[]; $audio=[]; $seen=[];
-    $push = static function(?array $r) use (&$images,&$videos,&$audio,&$seen): void {
+    $push = static function(?array $r, string $scope) use (&$images,&$videos,&$audio,&$seen): void {
         if (!$r || empty($r['url'])) return;
         $url=trim((string)$r['url']); if($url===''||isset($seen[$url]))return; $seen[$url]=true;
         $kind=(string)($r['kind'] ?? (str_starts_with((string)($r['mime']??''),'image/')?'image':''));
-        if($kind==='image' && count($images)<30)$images[]=['uri'=>$url];
-        elseif($kind==='video' && count($videos)<10)$videos[]=['uri'=>$url];
-        elseif($kind==='audio' && count($audio)<10)$audio[]=['uri'=>$url];
+        $entry=['uri'=>$url,'role'=>adref_default_role($r,$scope),'id'=>(string)($r['id']??''),'source_scope'=>$scope,'name'=>(string)($r['original_name']??'')];
+        if($kind==='image' && count($images)<30)$images[]=$entry;
+        elseif($kind==='video' && count($videos)<10)$videos[]=$entry;
+        elseif($kind==='audio' && count($audio)<10)$audio[]=$entry;
     };
-    $push(adref_master(is_array($state['character']??null)?$state['character']:null));
-    foreach((array)($state['world']['references']??[]) as $r) if(is_array($r))$push($r);
-    foreach((array)($shot['references']??[]) as $r) if(is_array($r))$push($r);
+    $push(adref_master(is_array($state['character']??null)?$state['character']:null),'character');
+    foreach((array)($state['world']['references']??[]) as $r) if(is_array($r))$push($r,'world');
+    foreach((array)($shot['references']??[]) as $r) if(is_array($r))$push($r,'shot');
     return ['images'=>$images,'videos'=>$videos,'audio'=>$audio];
+}
+function adref_role_instruction(string $label, array $ref): string {
+    $role=(string)($ref['role']??'reference');
+    $guidance=match($role){
+        'character'=>'preserve this character identity, face, hair, body proportions and wardrobe identity',
+        'environment'=>'preserve this location/environment design, spatial layout, architecture and atmosphere',
+        'prop'=>'preserve this prop/object design and recognizable details',
+        'style'=>'use this only for visual language, rendering, palette, texture and cinematography; do not copy identity from it',
+        'motion'=>'use this for movement, timing, staging and physical behavior; do not replace character identity',
+        'voice'=>'use this as voice/vocal identity guidance when audio generation is relevant',
+        'sound'=>'use this for sound, rhythm, ambience or music guidance',
+        default=>'use this as supporting reference only where relevant to the shot direction',
+    };
+    return $label.' role='.$role.': '.$guidance.'.';
 }
 function adref_prompt(array $state,array $shot,array $refs): string {
     $c=is_array($state['character']??null)?$state['character']:null; $w=is_array($state['world']??null)?$state['world']:[]; $parts=[];
@@ -31,13 +58,12 @@ function adref_prompt(array $state,array $shot,array $refs): string {
     $worldBits=[];
     foreach(['location'=>'Location','environment'=>'Environment','lighting'=>'Lighting','palette'=>'Palette','weather'=>'Weather','time_of_day'=>'Time','style_rules'=>'World style','continuity_rules'=>'Continuity'] as $k=>$label){if(trim((string)($w[$k]??''))!=='')$worldBits[]=$label.': '.trim((string)$w[$k]);}
     if($worldBits)$parts[]='Persistent world memory — '.implode('; ',$worldBits).'.';
+    foreach($refs['images'] as $i=>$r)$parts[]=adref_role_instruction('Image '.($i+1),$r);
+    foreach($refs['videos'] as $i=>$r)$parts[]=adref_role_instruction('Video '.($i+1),$r);
+    foreach($refs['audio'] as $i=>$r)$parts[]=adref_role_instruction('Audio '.($i+1),$r);
     $parts[]='Shot direction: '.trim((string)($shot['intent']??$shot['direction']??'')).'.';
     if(!empty($shot['camera_direction']))$parts[]='Camera: '.trim((string)$shot['camera_direction']).'.';
     if(!empty($shot['revision_notes']))$parts[]='Revision: '.trim((string)$shot['revision_notes']).'.';
-    $imageCount=count($refs['images']);$videoCount=count($refs['videos']);$audioCount=count($refs['audio']);
-    if($imageCount)$parts[]='Use the image references to preserve character identity, environment design, props and visual style according to the direction above.';
-    if($videoCount)$parts[]='Use video references for motion, timing, staging or scene behavior without replacing the locked identity.';
-    if($audioCount)$parts[]='Use audio references as sound, rhythm, vocal or atmosphere guidance where relevant.';
     $boost=(string)($shot['anime_boost_mode']??'natural');
     if($boost==='anime')$parts[]='Polished cinematic anime motion with readable anticipation, impact and follow-through.';
     elseif($boost==='extreme')$parts[]='High-energy sakuga-inspired animation while preserving anatomy and identity.';
@@ -54,14 +80,15 @@ try {
         $accepted=ad_provider_accepted_attempts($state,$shotId,$providerId);if($accepted>=3)ad_json(['ok'=>false,'error'=>'Maximum 3 paid reference attempts reached for this shot.'],409);
         $refs=adref_collect($state,$shot);if(!$refs['images']&&!$refs['videos']&&!$refs['audio'])ad_json(['ok'=>false,'error'=>'No character, world, or shot references are available.'],409);
         foreach(array_merge($refs['images'],$refs['videos'],$refs['audio']) as $r)if(!ad_mock_mode())ad_require_live_public_https_url((string)$r['uri']);
-        $duration=max(4,min(30,(float)($shot['duration_target']??5)));$jobId=ad_id('job');$meta=ad_provider_registry()[$providerId];
-        $job=ad_normalize_job(['id'=>$jobId,'shot_id'=>$shotId,'performance_id'=>'','character_version_id'=>(string)($state['character']['id']??''),'provider'=>$providerId,'model'=>'seedance2_5','capability'=>'MULTI_REFERENCE','attempt'=>$accepted+1,'status'=>'submitted','duration_seconds'=>$duration,'estimated_cost_usd'=>$provider->estimatedUsd($duration),'submitted_at'=>ad_now(),'metadata'=>['world_version'=>$state['world']['version']??null,'image_refs'=>count($refs['images']),'video_refs'=>count($refs['videos']),'audio_refs'=>count($refs['audio'])]]);
+        $duration=max(4,min(30,(float)($shot['duration_target']??5)));$jobId=ad_id('job');
+        $roleMap=[];foreach(['images'=>'Image','videos'=>'Video','audio'=>'Audio'] as $bucket=>$label)foreach($refs[$bucket] as $i=>$r)$roleMap[$label.' '.($i+1)]=(string)$r['role'];
+        $job=ad_normalize_job(['id'=>$jobId,'shot_id'=>$shotId,'performance_id'=>'','character_version_id'=>(string)($state['character']['id']??''),'provider'=>$providerId,'model'=>'seedance2_5','capability'=>'MULTI_REFERENCE','attempt'=>$accepted+1,'status'=>'submitted','duration_seconds'=>$duration,'estimated_cost_usd'=>$provider->estimatedUsd($duration),'submitted_at'=>ad_now(),'metadata'=>['world_version'=>$state['world']['version']??null,'image_refs'=>count($refs['images']),'video_refs'=>count($refs['videos']),'audio_refs'=>count($refs['audio']),'reference_roles'=>$roleMap]]);
         ad_state_mutate(function(array $s)use($job,$shotId):array{$s['jobs'][]=$job;foreach($s['shots']as&$x)if(($x['id']??'')===$shotId){$x['status']='generating';$x['world_version_id']='world-v'.(string)($s['world']['version']??1);$x['updated_at']=ad_now();break;}unset($x);return$s;});
         try{
             $submitted=$provider->submit(['prompt_text'=>adref_prompt($state,$shot,$refs),'reference_images'=>$refs['images'],'reference_videos'=>$refs['videos'],'reference_audio'=>$refs['audio'],'duration_seconds'=>$duration,'ratio'=>(string)($shot['ratio']??'1280:720'),'generate_audio'=>!empty($d['generate_audio'])]);
             $external=trim((string)($submitted['external_id']??''));if($external==='')throw new RuntimeException('Provider returned no task id.');
             $updated=ad_state_mutate(function(array $s)use($jobId,$external,$submitted):array{foreach($s['jobs']as&$j)if(($j['id']??'')===$jobId){$j['provider_job_id']=$external;$j['external_id']=$external;$j['raw']=$submitted['raw']??null;break;}unset($j);return$s;});
-            ad_event('multi_reference_generation_submitted',['job_id'=>$jobId,'shot_id'=>$shotId]);ad_json(['ok'=>true,'job'=>adref_find($updated['jobs'],$jobId),'estimated_cost_usd'=>$job['estimated_cost_usd']]);
+            ad_event('multi_reference_generation_submitted',['job_id'=>$jobId,'shot_id'=>$shotId,'reference_roles'=>$roleMap]);ad_json(['ok'=>true,'job'=>adref_find($updated['jobs'],$jobId),'estimated_cost_usd'=>$job['estimated_cost_usd']]);
         }catch(Throwable$e){$safe=ad_safe_provider_error($e);ad_state_mutate(function(array$s)use($jobId,$shotId,$safe):array{foreach($s['jobs']as&$j)if(($j['id']??'')===$jobId){$j['status']='failed';$j['failed_at']=ad_now();$j['safe_error']=$safe['safe_error'];break;}unset($j);foreach($s['shots']as&$x)if(($x['id']??'')===$shotId){$x['status']='draft';break;}unset($x);return$s;});ad_json(['ok'=>false,'error'=>$safe['safe_error']],502);}
     }
 
