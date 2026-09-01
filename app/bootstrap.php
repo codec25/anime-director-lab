@@ -89,7 +89,6 @@ function ad_public_media_url(string $relativePath): string {
 require_once AD_ROOT . '/app/schema.php';
 require_once AD_ROOT . '/app/state.php';
 require_once AD_ROOT . '/app/storage.php';
-require_once AD_ROOT . '/app/director_references.php';
 require_once AD_ROOT . '/app/providers/ProviderInterface.php';
 require_once AD_ROOT . '/app/providers/RunwayProvider.php';
 require_once AD_ROOT . '/app/providers/RunwayDescribeProvider.php';
