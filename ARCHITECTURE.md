@@ -1,106 +1,95 @@
-# Anime Director Lab — Architecture
+# Anime Director — Architecture
 
-## 1. Product mission
+## Product mission
 
-Anime Director is not a generic AI anime generator.
+Anime Director is not a generic prompt-to-video page and not a benchmark dashboard.
 
-**Perform it. Direct it. Animate it.**
+**Direct it. Perform it when needed. Generate takes. Build the scene.**
 
-The creator remains the director/performer. AI executes difficult animation work. The lab validates whether one locked original character can convincingly perform a human-recorded movement across takes and providers.
+The creator-facing product is `director.php`. Natural-language direction is the default workflow. The advanced workspace lives in `lab.php` for character setup, performance-driven animation, take review, and deeper controls.
 
-## 2. Production hierarchy
+## Canonical routes
+
+- `index.php` → redirects to Director
+- `director.php` → primary creator experience
+- `lab.php` → advanced/technical workspace
+- `api.php` → shared production/state API
+- `director-api.php` → describe-to-video generation jobs
+
+There must not be two competing product home screens.
+
+## Production hierarchy
 
 ```
 PRODUCTION
 ├── Character Bible
-├── World Bible (stub)
+├── World Bible
 ├── Scenes
 │   └── Shots
-│       ├── Performances (human source)
-│       ├── Generation Jobs
-│       └── Generated Takes
-└── Final Cut (selected takes / future export)
+│       ├── Direction
+│       ├── Optional human performance
+│       ├── Generation jobs
+│       └── Generated takes
+└── Final cut / export
 ```
 
-Current lab defaults to one production and Scene 01.
+## Character ownership
 
-## 3. Character Bible ownership
+Character identity belongs to Anime Director, not a provider. The Character Bible stores versioned identity notes and canonical references. Provider-specific bindings stay optional beneath that identity.
 
-The Character Bible owns identity:
+## Two creation paths
 
-- versioned character record (`AKIO-v1`)
-- identity notes (body, face, hair, eyes, outfit, movement, voice)
-- canonical reference roles (`master_front`, `three_quarter`, `portrait`, …)
-- optional `provider_bindings` beneath the bible
+### DIRECT IT
 
-Canonical character identity must never depend on a provider ID.
+Natural-language direction creates `DESCRIBE_IT` shots. A describe-to-video provider can generate takes directly from those shots while preserving the locked character reference when supported.
 
-Creation paths prepared in UX:
+### ACT IT
 
-1. Upload character
-2. Import character sheet
-3. Generated reference (future)
-4. Draw character (future)
+When body motion, acting, dance, martial movement, gesture, or timing needs stronger fidelity, the creator can upload a human performance in Advanced and generate an `ACT_IT` take.
 
-## 4. Performance vs generated take
+These paths create the same underlying shot/take records. They are not separate products.
 
-Critical distinction:
+## AI gateway
 
-- **Performance** = human-recorded source media for ACT IT
-- **Generated take** = provider output for a shot/job
+Application code requests capabilities rather than exposing raw provider model logic throughout the UI.
 
-A recorded performance is never collapsed into final scene media. Directors compare generated takes and choose one.
+Current capability vocabulary includes:
 
-## 5. AI Gateway
+- `ACT_IT`
+- `DESCRIBE_SHOT`
+- `ANIMATE_SHOT`
+- `CONTINUE_SHOT`
+- `DIALOGUE`
+- `LIP_SYNC`
+- `ANIME_BOOST`
+- `SOUND_EFFECT`
 
-Application code requests **capabilities**, not raw vendor model names:
+Implemented provider paths currently include Runway performance driving and Runway describe-to-video. Other adapters remain optional until truly wired.
 
-`ACT_IT`, `ANIMATE_SHOT`, `DESCRIBE_SHOT`, `DIALOGUE`, `CONTINUE_SHOT`, `LIP_SYNC`, `ANIME_BOOST`, `SOUND_EFFECT`
+Secrets stay server-side. Paid generation is never silently retried.
 
-Providers are adapters. Implemented: Runway, Vidu. Stubs: Kling, Google, Wan/local.
+## Jobs and takes
 
-Secrets stay server-side in `.env`. Frontend only receives availability/cost/limitation metadata.
+A generation job records provider, capability, model, attempt, task id, status, timestamps, estimated cost, and safe errors. Completed provider output becomes a generated take attached to the same shot.
 
-## 6. Generation jobs
+Policy: maximum 3 provider-accepted attempts per provider per shot unless deliberately changed later.
 
-Jobs track capability, provider, model, attempt, provider job id, timestamps, estimated/actual cost, and safe errors.
+## Anime Boost
 
-Statuses: `queued` → `submitted` → `processing` → `completed` | `failed` | `cancelled`.
+Anime Boost is direction metadata layered over a shot. It can encode anticipation, exaggeration, impact, follow-through, speed, camera reaction, and VFX intensity. The UI must not claim an effect is rendered unless the active provider or post pipeline really supports it.
 
-Policy: **max 3 attempts per provider per shot**. No silent paid retries beyond that.
+## Product rule
 
-## 7. Anime Boost
+Only show creator-facing controls that perform a real action. Experimental diagnostics, scoring, provider comparison, and performance tooling belong in Advanced. Dead-end buttons, duplicate scripts, fake attachment controls, and competing navigation paths should be removed rather than preserved for history.
 
-Anime Boost is a **distinct direction layer** after performance direction.
+## Next production capabilities
 
-Modes: `natural` | `anime` | `extreme`.
+Priority order:
 
-Structured metadata (anticipation, exaggeration, impact, follow-through, speed, camera reaction, vfx intensity) is stored even when providers cannot consume it yet.
-
-Two future layers:
-
-1. AI motion/style enhancement
-2. Editable post/compositing effects (speed lines, impact flash, SFX, …)
-
-Do not claim these are fully solved provider features today.
-
-## 8. Benchmark system
-
-A1–A4 / B1–B4 tests with 12-part scoring, CPS / PPS / DUS, usable yes/no, attempt + cost tracking, and a compact provider×test summary.
-
-## 9. What is experimental
-
-- Mock ACT IT workflow (no paid spend)
-- DESCRIBE IT architecture/UI without live generation
-- Anime Boost as creative direction metadata
-- Scene filmstrip / cheap animatic placeholders
-- Stub provider adapters
-
-## 10. Deliberately not built yet
-
-- Accounts / auth / subscriptions / billing
-- Social, community, marketplace
-- Full drawing canvas or local character generator
-- Giant timeline / After Effects compositor
-- Live Kling / Google / Wan integrations
-- World Bible depth, collaboration, SHORTS merge
+1. true per-shot reference attachments
+2. edit/revise an existing shot through conversation
+3. continue a selected take into the next shot
+4. scene/world continuity memory
+5. dialogue, voice, and lip sync
+6. sound design
+7. multi-shot orchestration and export
