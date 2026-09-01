@@ -1,30 +1,39 @@
-anime_director_lab/
-├── .env.example
-├── .gitignore
-├── .htaccess
-├── README.md
-├── RESEARCH-NOTES.md
-├── api.php
-├── index.php
-├── app/
-│   ├── .htaccess
-│   ├── bootstrap.php
-│   ├── state.php
-│   ├── storage.php
-│   └── providers/
-│       ├── ProviderInterface.php
-│       ├── RunwayProvider.php
-│       └── ViduProvider.php
-├── assets/
-│   ├── css/
-│   │   └── app.css
-│   └── js/
-│       └── app.js
-├── data/
-│   ├── .gitkeep
-│   └── .htaccess
-└── storage/
-    ├── .htaccess
-    ├── characters/.gitkeep
-    ├── performances/.gitkeep
-    └── results/.gitkeep
+Anime Director — current branch upload map
+
+Canonical creator product:
+- index.php
+- director.php
+- director-api.php
+- lab.php
+
+Frontend:
+- assets/css/director.css
+- assets/js/director.js
+
+Backend additions/changes:
+- app/bootstrap.php
+- app/gateway.php
+- app/providers/RunwayDescribeProvider.php
+
+Server routing/docs:
+- .htaccess
+- ARCHITECTURE.md
+- README.md
+
+Existing shared files still required on the server:
+- api.php
+- app/schema.php
+- app/state.php
+- app/storage.php
+- app/providers/ProviderInterface.php
+- app/providers/RunwayProvider.php
+- app/providers/ViduProvider.php
+- assets/css/app.css
+- assets/js/app.js
+
+Do not upload `.env` from Git. Keep provider keys server-side.
+
+Routing after upload:
+/ -> index.php -> director.php
+/director.php -> primary creator workspace
+/lab.php -> advanced workspace
