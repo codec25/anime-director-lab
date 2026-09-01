@@ -46,8 +46,8 @@ function adref_role_instruction(string $label, array $ref): string {
         'prop'=>'preserve this prop/object design and recognizable details',
         'style'=>'use this only for visual language, rendering, palette, texture and cinematography; do not copy identity from it',
         'motion'=>'use this for movement, timing, staging and physical behavior; do not replace character identity',
-        'voice'=>'use this as voice/vocal identity guidance when audio generation is relevant',
-        'sound'=>'use this for sound, rhythm, ambience or music guidance',
+        'voice'=>'treat this as the speaking character voice and dialogue timing reference; preserve its vocal identity and synchronize visible speaking behavior as closely as the model supports',
+        'sound'=>'use this for ambience, music, rhythm or sound-effect guidance; do not treat it as character dialogue unless explicitly directed',
         default=>'use this as supporting reference only where relevant to the shot direction',
     };
     return $label.' role='.$role.': '.$guidance.'.';
@@ -61,6 +61,8 @@ function adref_prompt(array $state,array $shot,array $refs): string {
     foreach($refs['images'] as $i=>$r)$parts[]=adref_role_instruction('Image '.($i+1),$r);
     foreach($refs['videos'] as $i=>$r)$parts[]=adref_role_instruction('Video '.($i+1),$r);
     foreach($refs['audio'] as $i=>$r)$parts[]=adref_role_instruction('Audio '.($i+1),$r);
+    $lines=array_values(array_filter((array)($shot['dialogue']??[]),static fn($x):bool=>is_array($x)&&trim((string)($x['text']??''))!==''));
+    if($lines){$dialogue=[];foreach($lines as $ln){$t=trim((string)$ln['text']);$delivery=trim((string)($ln['delivery']??''));$dialogue[]='"'.$t.'"'.($delivery!==''?' ('.$delivery.')':'');}$parts[]='Dialogue in this shot: '.implode(' | ',$dialogue).'. Preserve the spoken wording and natural conversational timing.';}
     $parts[]='Shot direction: '.trim((string)($shot['intent']??$shot['direction']??'')).'.';
     if(!empty($shot['camera_direction']))$parts[]='Camera: '.trim((string)$shot['camera_direction']).'.';
     if(!empty($shot['revision_notes']))$parts[]='Revision: '.trim((string)$shot['revision_notes']).'.';
@@ -82,10 +84,11 @@ try {
         foreach(array_merge($refs['images'],$refs['videos'],$refs['audio']) as $r)if(!ad_mock_mode())ad_require_live_public_https_url((string)$r['uri']);
         $duration=max(4,min(30,(float)($shot['duration_target']??5)));$jobId=ad_id('job');
         $roleMap=[];foreach(['images'=>'Image','videos'=>'Video','audio'=>'Audio'] as $bucket=>$label)foreach($refs[$bucket] as $i=>$r)$roleMap[$label.' '.($i+1)]=(string)$r['role'];
-        $job=ad_normalize_job(['id'=>$jobId,'shot_id'=>$shotId,'performance_id'=>'','character_version_id'=>(string)($state['character']['id']??''),'provider'=>$providerId,'model'=>'seedance2_5','capability'=>'MULTI_REFERENCE','attempt'=>$accepted+1,'status'=>'submitted','duration_seconds'=>$duration,'estimated_cost_usd'=>$provider->estimatedUsd($duration),'submitted_at'=>ad_now(),'metadata'=>['world_version'=>$state['world']['version']??null,'image_refs'=>count($refs['images']),'video_refs'=>count($refs['videos']),'audio_refs'=>count($refs['audio']),'reference_roles'=>$roleMap]]);
+        $hasVoice=false;foreach($refs['audio'] as $r)if(($r['role']??'')==='voice'){$hasVoice=true;break;}
+        $job=ad_normalize_job(['id'=>$jobId,'shot_id'=>$shotId,'performance_id'=>'','character_version_id'=>(string)($state['character']['id']??''),'provider'=>$providerId,'model'=>'seedance2_5','capability'=>'MULTI_REFERENCE','attempt'=>$accepted+1,'status'=>'submitted','duration_seconds'=>$duration,'estimated_cost_usd'=>$provider->estimatedUsd($duration),'submitted_at'=>ad_now(),'metadata'=>['world_version'=>$state['world']['version']??null,'image_refs'=>count($refs['images']),'video_refs'=>count($refs['videos']),'audio_refs'=>count($refs['audio']),'reference_roles'=>$roleMap,'dialogue_audio'=>$hasVoice]]);
         ad_state_mutate(function(array $s)use($job,$shotId):array{$s['jobs'][]=$job;foreach($s['shots']as&$x)if(($x['id']??'')===$shotId){$x['status']='generating';$x['world_version_id']='world-v'.(string)($s['world']['version']??1);$x['updated_at']=ad_now();break;}unset($x);return$s;});
         try{
-            $submitted=$provider->submit(['prompt_text'=>adref_prompt($state,$shot,$refs),'reference_images'=>$refs['images'],'reference_videos'=>$refs['videos'],'reference_audio'=>$refs['audio'],'duration_seconds'=>$duration,'ratio'=>(string)($shot['ratio']??'1280:720'),'generate_audio'=>!empty($d['generate_audio'])]);
+            $submitted=$provider->submit(['prompt_text'=>adref_prompt($state,$shot,$refs),'reference_images'=>$refs['images'],'reference_videos'=>$refs['videos'],'reference_audio'=>$refs['audio'],'duration_seconds'=>$duration,'ratio'=>(string)($shot['ratio']??'1280:720'),'generate_audio'=>array_key_exists('generate_audio',$d)?!empty($d['generate_audio']):$hasVoice]);
             $external=trim((string)($submitted['external_id']??''));if($external==='')throw new RuntimeException('Provider returned no task id.');
             $updated=ad_state_mutate(function(array $s)use($jobId,$external,$submitted):array{foreach($s['jobs']as&$j)if(($j['id']??'')===$jobId){$j['provider_job_id']=$external;$j['external_id']=$external;$j['raw']=$submitted['raw']??null;break;}unset($j);return$s;});
             ad_event('multi_reference_generation_submitted',['job_id'=>$jobId,'shot_id'=>$shotId,'reference_roles'=>$roleMap]);ad_json(['ok'=>true,'job'=>adref_find($updated['jobs'],$jobId),'estimated_cost_usd'=>$job['estimated_cost_usd']]);
