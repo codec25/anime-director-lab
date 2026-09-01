@@ -29,12 +29,10 @@
           <span class="character-context" id="directorSceneCount">0 shots</span>
         </div>
         <textarea class="director-input" id="directorPrompt" rows="3" placeholder="Describe the anime scene, feeling, or change you want…" aria-label="Direct your next scene"></textarea>
-        <div class="attachment-strip" id="attachmentStrip"></div>
         <div class="compose-actions">
-          <div class="compose-left"><button class="round-btn" id="directorAttach" type="button" title="Add reference">＋</button><button class="mode-btn" id="directorMode" type="button">Guide me ▾</button></div>
+          <div class="compose-left"><button class="mode-btn" id="directorMode" type="button">Guide me ▾</button></div>
           <div class="compose-right"><button class="send-btn" id="directorSend" type="button" aria-label="Send direction">↑</button></div>
         </div>
-        <input class="hidden-input" id="directorFile" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,audio/*" multiple>
       </div>
     </section>
 
