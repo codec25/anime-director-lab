@@ -6,20 +6,20 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#08080b">
 <title>Anime Director</title>
-<link rel="stylesheet" href="assets/css/director.css?v=001">
+<link rel="stylesheet" href="assets/css/director.css?v=002">
 </head>
 <body>
 <div class="director-shell">
   <header class="director-topbar">
     <div class="brand"><span class="brand-mark">AD</span><span>Anime Director</span></div>
-    <div class="top-actions"><a class="ghost-btn" href="index.php" style="text-decoration:none;display:grid;place-items:center">Lab</a><button class="icon-btn" id="newDirection" type="button">＋ New</button></div>
+    <div class="top-actions"><a class="ghost-btn" href="lab.php" style="text-decoration:none;display:grid;place-items:center">Advanced</a><button class="icon-btn" id="newDirection" type="button">＋ New</button></div>
   </header>
 
   <main>
     <section class="hero">
       <span class="eyebrow">✦ Director Mode</span>
       <h1><span>Direct the anime</span><br>in your head.</h1>
-      <p>Describe the story, action, camera, mood, or change. Anime Director turns your direction into production-ready shots while keeping your character and scene structure attached.</p>
+      <p>Describe the story, action, camera, mood, or change. Anime Director turns your direction into shots while keeping character identity and production continuity attached.</p>
     </section>
 
     <section class="director-card" aria-label="Director prompt">
@@ -42,29 +42,28 @@
     <section class="conversation" id="conversation" aria-live="polite"></section>
 
     <section>
-      <div class="section-head"><div><h2>Your production</h2><p>Latest directed shots. Generate a take here or open the shot in the technical Lab.</p></div><a class="text-link" href="index.php#scene">Open scene →</a></div>
+      <div class="section-head"><div><h2>Your production</h2><p>Latest directed shots. Generate a take here or open advanced controls when a shot needs exact performance driving.</p></div><a class="text-link" href="lab.php#scene">Open scene →</a></div>
       <div class="scene-list" id="directorScenes"><div class="empty">Loading production…</div></div>
     </section>
 
     <section class="workspace-grid" style="margin-top:22px">
-      <article class="mini-panel"><h3>Director memory</h3><p>Character identity is owned by your Character Bible, not by a single AI provider. Direction is stored per shot so you can change providers without losing the creative intent.</p></article>
-      <article class="mini-panel"><h3>Perform it + describe it</h3><p>Use natural-language direction for fast anime shots. For movement-critical animation, use ACT IT in Lab and drive the character from your own performance instead of asking text alone to guess the motion.</p></article>
+      <article class="mini-panel"><h3>Director memory</h3><p>Character identity belongs to your Character Bible, not one AI provider. Shot direction stays attached even if the generation provider changes.</p></article>
+      <article class="mini-panel"><h3>Perform it when needed</h3><p>Natural language is the fast path. For movement-critical animation, use ACT IT in Advanced and drive the character from your own performance.</p></article>
     </section>
 
     <section>
-      <div class="section-head"><div><h2>Production capabilities</h2><p>Green is usable in the current architecture. Amber is still planned.</p></div></div>
+      <div class="section-head"><div><h2>Production capabilities</h2><p>Only working capabilities are shown as ready.</p></div></div>
       <div class="feature-list" id="capabilityGrid"></div>
     </section>
   </main>
 </div>
 <nav class="bottom-nav" aria-label="Primary navigation">
   <a href="director.php"><span class="nav-icon">⌂</span><span>Home</span></a>
-  <a href="index.php#character"><span class="nav-icon">◎</span><span>Characters</span></a>
+  <a href="lab.php#character"><span class="nav-icon">◎</span><span>Characters</span></a>
   <a href="#" id="createNav" class="active"><span class="bottom-create">✦</span><span style="margin-top:25px">Direct</span></a>
-  <a href="index.php"><span class="nav-icon">▦</span><span>Lab</span></a>
+  <a href="lab.php"><span class="nav-icon">▦</span><span>Advanced</span></a>
 </nav>
 <script>window.AD_CONFIG={mock:<?= ad_mock_mode() ? 'true' : 'false' ?>};</script>
-<script src="assets/js/director.js?v=001"></script>
-<script src="assets/js/director-generate.js?v=001"></script>
+<script src="assets/js/director.js?v=002"></script>
 </body>
 </html>
