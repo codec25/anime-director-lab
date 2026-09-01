@@ -60,9 +60,11 @@ Live provider requirements:
 - Scene Memory overrides only filled fields; empty scene fields inherit World Memory.
 - Location Presets are reusable copies; applying one does not create a live link back to the preset.
 - New shots are bound to the currently active scene and inherit its scene references/environment plates.
-- Voice Memory uses Runway Seed Audio through the same server-side Runway key. A reference voice clip is optional but must be audio you own or have permission to use.
-- Generated dialogue is stored as a semantic `voice` reference on the shot so reference-aware video generation can use the spoken performance as context.
-- Exact mouth/facial performance remains the ACT IT path because Runway deprecated standalone Lip Sync in favor of Act-Two.
+- Cast + Voices supports multiple recurring characters. The locked Character Bible remains the primary cast member; secondary cast members can store their own identity image and voice reference.
+- Every dialogue line stores speaker_id and speaker_name, so dialogue turn order and generated speech stay assigned to the correct recurring character.
+- Runway Seed Audio is used per dialogue turn. Each generated clip is stored as a semantic `voice` reference with the speaker identity attached.
+- Reference-aware video generation automatically includes identity references for the characters speaking in that shot and labels voice references with the named speaker in the prompt.
+- Exact multi-character mouth/facial performance still requires separate ACT IT / Act-Two passes per speaking character. Runway Act-Two currently controls one isolated character at a time; compositing those passes is a later orchestration step.
 - Native continuation uses the previous generated video and requires a provider-fetchable public HTTPS URL.
 - Seedance 2.5 input/reference videos must be at least 480p.
 
