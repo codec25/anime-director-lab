@@ -4,6 +4,7 @@ Canonical creator product:
 - index.php
 - director.php
 - director-api.php
+- continue-api.php
 - lab.php
 
 Frontend:
@@ -13,7 +14,9 @@ Frontend:
 Backend additions/changes:
 - app/bootstrap.php
 - app/gateway.php
+- app/storage.php
 - app/providers/RunwayDescribeProvider.php
+- app/providers/RunwayContinueProvider.php
 
 Server routing/docs:
 - .htaccess
@@ -24,7 +27,6 @@ Existing shared files still required on the server:
 - api.php
 - app/schema.php
 - app/state.php
-- app/storage.php
 - app/providers/ProviderInterface.php
 - app/providers/RunwayProvider.php
 - app/providers/ViduProvider.php
@@ -32,6 +34,13 @@ Existing shared files still required on the server:
 - assets/js/app.js
 
 Do not upload `.env` from Git. Keep provider keys server-side.
+
+Live provider requirements:
+- RUNWAY_API_KEY=...
+- ANIME_DIRECTOR_BASE_URL must point to the public HTTPS app URL.
+- ANIME_DIRECTOR_MOCK_MODE=0 for live generation.
+- Native continuation uses the previous generated video and requires a provider-fetchable public HTTPS URL.
+- Seedance 2.5 continuation input video must be at least 480p.
 
 Routing after upload:
 / -> index.php -> director.php
