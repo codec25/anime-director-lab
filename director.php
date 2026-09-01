@@ -8,6 +8,7 @@
 <title>Anime Director</title>
 <link rel="stylesheet" href="assets/css/director.css?v=002">
 <link rel="stylesheet" href="assets/css/world-memory.css?v=001">
+<link rel="stylesheet" href="assets/css/semantic-references.css?v=001">
 </head>
 <body>
 <div class="director-shell">
@@ -65,5 +66,6 @@
 <script>window.AD_CONFIG={mock:<?= ad_mock_mode() ? 'true' : 'false' ?>};</script>
 <script src="assets/js/director.js?v=002"></script>
 <script src="assets/js/world-memory.js?v=001"></script>
+<script src="assets/js/semantic-references.js?v=001"></script>
 </body>
 </html>
