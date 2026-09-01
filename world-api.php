@@ -6,6 +6,10 @@ $action = (string)($_GET['action'] ?? 'state');
 
 function adworld_normalize(array $world): array {
     $refs = array_values(array_filter((array)($world['references'] ?? []), 'is_array'));
+    foreach ($refs as &$ref) {
+        if (!isset($ref['role']) || trim((string)$ref['role']) === '') $ref['role'] = (($ref['kind'] ?? '') === 'audio') ? 'sound' : 'environment';
+    }
+    unset($ref);
     return array_merge($world, [
         'id' => (string)($world['id'] ?? 'world_main'),
         'status' => 'active',
@@ -49,6 +53,7 @@ try {
     if ($action === 'attach-reference' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($_FILES['reference'])) ad_json(['ok'=>false,'error'=>'Reference file is required.'],422);
         $asset = ad_store_director_reference($_FILES['reference']);
+        $asset['role'] = (($asset['kind'] ?? '') === 'audio') ? 'sound' : 'environment';
         $next = ad_state_mutate(function(array $state) use ($asset): array {
             $world = adworld_normalize((array)($state['world'] ?? []));
             $refs = (array)($world['references'] ?? []); $refs[] = $asset;
@@ -58,7 +63,7 @@ try {
             $state['world'] = adworld_normalize($world);
             return $state;
         });
-        ad_event('world_reference_attached', ['reference_id'=>$asset['id'],'kind'=>$asset['kind']]);
+        ad_event('world_reference_attached', ['reference_id'=>$asset['id'],'kind'=>$asset['kind'],'role'=>$asset['role']]);
         ad_json(['ok'=>true,'reference'=>$asset,'world'=>$next['world']]);
     }
 
