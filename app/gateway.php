@@ -10,7 +10,7 @@ function ad_capabilities(): array {
     return [
         'ACT_IT' => 'Preserve a human performance on a locked character.',
         'ANIMATE_SHOT' => 'Animate a shot from approved direction.',
-        'DESCRIBE_SHOT' => 'Text/direction-driven shot generation (architecture only in 0.01).',
+        'DESCRIBE_SHOT' => 'Text/direction-driven shot generation.',
         'DIALOGUE' => 'Dialogue-driven performance assist (not wired).',
         'CONTINUE_SHOT' => 'Continue motion from a prior take (not wired).',
         'LIP_SYNC' => 'Lip sync assist (not wired).',
@@ -30,6 +30,17 @@ function ad_provider_registry(): array {
             'cost_per_second_usd' => 0.05,
             'best_for' => 'Acting / gesture / dialogue',
             'limitations' => 'Max ~30s driving performance; character image/video input.',
+            'implemented' => true,
+        ],
+        'runway_gen45' => [
+            'class' => RunwayDescribeProvider::class,
+            'label' => 'Runway Gen-4.5',
+            'binding_key' => 'runway',
+            'capabilities' => ['DESCRIBE_SHOT', 'ANIMATE_SHOT'],
+            'model' => 'gen4.5',
+            'cost_per_second_usd' => 0.12,
+            'best_for' => 'Natural-language anime shot generation from text or a locked reference image',
+            'limitations' => '2–10s per generation. Text-only is landscape/portrait; image-to-video supports more ratios.',
             'implemented' => true,
         ],
         'vidu_motion_2_5' => [
