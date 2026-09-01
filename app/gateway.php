@@ -8,9 +8,9 @@ function ad_capabilities(): array {
         'ANIMATE_SHOT' => 'Animate a shot from approved direction.',
         'DESCRIBE_SHOT' => 'Text/direction-driven shot generation.',
         'MULTI_REFERENCE' => 'Bind character, world, image, video and audio references into generation.',
-        'DIALOGUE' => 'Dialogue-driven performance assist (not wired).',
+        'DIALOGUE' => 'Speaker-assigned dialogue with persistent per-character voice memory.',
         'CONTINUE_SHOT' => 'Continue a generated video into the next directed shot.',
-        'LIP_SYNC' => 'Lip sync assist (not wired).',
+        'LIP_SYNC' => 'Precision facial/dialogue performance through per-character Act-Two passes.',
         'ANIME_BOOST' => 'Stylized amplification layer over preserved performance.',
         'SOUND_EFFECT' => 'Impact/SFX direction (editable-effects future).',
     ];
@@ -19,14 +19,14 @@ function ad_capabilities(): array {
 function ad_provider_registry(): array {
     return [
         'runway_act_two' => [
-            'class' => RunwayProvider::class,
+            'class' => RunwayActTwoProvider::class,
             'label' => 'Runway Act-Two',
             'binding_key' => 'runway',
-            'capabilities' => ['ACT_IT', 'ANIMATE_SHOT'],
+            'capabilities' => ['ACT_IT', 'LIP_SYNC', 'DIALOGUE', 'ANIMATE_SHOT'],
             'model' => 'act_two',
             'cost_per_second_usd' => 0.05,
-            'best_for' => 'Acting / gesture / dialogue',
-            'limitations' => 'Max ~30s driving performance; character image/video input.',
+            'best_for' => 'Precision facial acting, speech performance, gestures and per-character dialogue passes',
+            'limitations' => 'One character input per pass; 3–30s driving performance. Multi-character scenes require separate passes and compositing.',
             'implemented' => true,
         ],
         'runway_gen45' => [
