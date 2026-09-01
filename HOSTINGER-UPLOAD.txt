@@ -3,6 +3,7 @@ Anime Director — current branch upload map
 Canonical creator product:
 - act-two-api.php
 - continue-api.php
+- continuity-review-api.php
 - dialogue-api.php
 - director-api.php
 - director.php
@@ -15,12 +16,14 @@ Canonical creator product:
 
 Frontend:
 - assets/css/act-two.css
+- assets/css/continuity-review.css
 - assets/css/dialogue.css
 - assets/css/director.css
 - assets/css/scene-memory.css
 - assets/css/semantic-references.css
 - assets/css/world-memory.css
 - assets/js/act-two.js
+- assets/js/continuity-review.js
 - assets/js/dialogue.js
 - assets/js/director.js
 - assets/js/scene-memory.js
@@ -75,6 +78,8 @@ Live provider requirements:
 - Act-Two driving performances must be 3–30 seconds. Character and performance media must be provider-fetchable public HTTPS URLs in live mode.
 - For scene-matched precision work, upload an isolated/cropped character video for each pass. If none is supplied, Anime Director falls back to that cast member's identity image.
 - A shot becomes `ready_to_composite` only after all required Act-Two passes finish. The composite plan keeps the original base take underneath and the per-character passes above it; masking/cropping/feathering remains an explicit verified compositing step rather than unsafe automatic overlap masking.
+- Scene Continuity Review compares generated takes side-by-side and stores per-shot human checks for identity, wardrobe, location, lighting, palette and screen direction.
+- Continuity Review automatically surfaces only metadata facts it can prove: missing takes, scene-memory snapshot drift, dominant aspect-ratio mismatch, unvoiced dialogue and incomplete precision passes. It does not claim visual AI detection unless a real vision-comparison provider is added later.
 - Native continuation uses the previous generated video and requires a provider-fetchable public HTTPS URL.
 - Seedance 2.5 input/reference videos must be at least 480p.
 
