@@ -7,12 +7,15 @@ Canonical creator product:
 - index.php
 - lab.php
 - reference-api.php
+- semantic-reference-api.php
 - world-api.php
 
 Frontend:
 - assets/css/director.css
+- assets/css/semantic-references.css
 - assets/css/world-memory.css
 - assets/js/director.js
+- assets/js/semantic-references.js
 - assets/js/world-memory.js
 
 Backend additions/changes:
@@ -45,6 +48,8 @@ Live provider requirements:
 - ANIME_DIRECTOR_BASE_URL must point to the public HTTPS app URL.
 - ANIME_DIRECTOR_MOCK_MODE=0 for live generation.
 - World/shot image, video and audio references must be provider-fetchable public HTTPS URLs.
+- Semantic roles available: character, environment, prop, style, motion, voice, sound, reference.
+- Provider reference order is mapped into the generation prompt (Image 1, Video 1, Audio 1, etc.) with the saved semantic role.
 - Seedance 2.5 native reference generation is the preferred path when World Memory or shot references are active.
 - Native continuation uses the previous generated video and requires a provider-fetchable public HTTPS URL.
 - Seedance 2.5 input/reference videos must be at least 480p.
