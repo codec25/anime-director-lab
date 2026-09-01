@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="assets/css/continuity-review.css?v=001">
 <link rel="stylesheet" href="assets/css/sound-design.css?v=001">
 <link rel="stylesheet" href="assets/css/timeline.css?v=001">
+<link rel="stylesheet" href="assets/css/production-stages.css?v=001">
 </head>
 <body>
 <div class="director-shell">
@@ -27,10 +28,10 @@
     <section class="hero">
       <span class="eyebrow">✦ Director Mode</span>
       <h1><span>Direct the anime</span><br>in your head.</h1>
-      <p>Describe the story, action, camera, mood, dialogue, or change. Anime Director keeps recurring character identities, separate voices, world memory, scene memory, references, and production continuity attached.</p>
+      <p>Build the film in four focused stages: direct the shots, perform the characters, review picture and sound, then finish the timeline.</p>
     </section>
 
-    <section class="director-card" aria-label="Director prompt">
+    <section class="director-card" id="directorComposeStage" aria-label="Director prompt">
       <div class="director-inner">
         <div class="context-row">
           <div class="character-context"><span class="character-dot" id="directorCharacterAvatar"></span><span class="status-dot" id="directorStatusDot"></span><span id="directorCharacterName">Loading character…</span></div>
@@ -47,19 +48,9 @@
     <div class="quick-row" id="quickRow" aria-label="Quick direction ideas"></div>
     <section class="conversation" id="conversation" aria-live="polite"></section>
 
-    <section>
-      <div class="section-head"><div><h2>Your production</h2><p>Latest directed shots. Assign dialogue turns to your cast, generate a take here, or use Precision passes when exact per-character facial performance matters.</p></div><a class="text-link" href="lab.php#scene">Open scene →</a></div>
+    <section id="productionStageShots">
+      <div class="section-head"><div><h2>Your production</h2><p>Direct and generate here. In Perform, the same shots expose dialogue and precision acting controls without changing the production order.</p></div><a class="text-link" href="lab.php#scene">Advanced →</a></div>
       <div class="scene-list" id="directorScenes"><div class="empty">Loading production…</div></div>
-    </section>
-
-    <section class="workspace-grid" style="margin-top:22px">
-      <article class="mini-panel"><h3>Director memory</h3><p>Character identities, Voice Memory, World Memory, and Scene Memory belong to your production, not one AI provider.</p></article>
-      <article class="mini-panel"><h3>Precision when needed</h3><p>Generated dialogue is the fast path. For exact mouth, face, gesture, or movement timing, create one Act-Two precision pass per speaking character and composite those passes over the common base shot.</p></article>
-    </section>
-
-    <section>
-      <div class="section-head"><div><h2>Production capabilities</h2><p>Only working capabilities are shown as ready.</p></div></div>
-      <div class="feature-list" id="capabilityGrid"></div>
     </section>
   </main>
 </div>
@@ -79,5 +70,6 @@
 <script src="assets/js/continuity-review.js?v=001"></script>
 <script src="assets/js/sound-design.js?v=001"></script>
 <script src="assets/js/timeline.js?v=001"></script>
+<script src="assets/js/production-stages.js?v=001"></script>
 </body>
 </html>
