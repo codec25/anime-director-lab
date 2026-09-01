@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="assets/css/act-two.css?v=001">
 <link rel="stylesheet" href="assets/css/continuity-review.css?v=001">
 <link rel="stylesheet" href="assets/css/sound-design.css?v=001">
+<link rel="stylesheet" href="assets/css/timeline.css?v=001">
 </head>
 <body>
 <div class="director-shell">
@@ -77,5 +78,6 @@
 <script src="assets/js/act-two.js?v=001"></script>
 <script src="assets/js/continuity-review.js?v=001"></script>
 <script src="assets/js/sound-design.js?v=001"></script>
+<script src="assets/js/timeline.js?v=001"></script>
 </body>
 </html>
