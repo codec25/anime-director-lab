@@ -18,10 +18,7 @@ function describeProvider(){return providers.find(p=>p.id==='runway_gen45'&&p.im
 function characterMaster(){const c=state?.character;return c?.references?.master_front||c?.asset||null}
 function latestDescribeJob(shotId){return [...(state?.jobs||[])].reverse().find(j=>j.shot_id===shotId&&j.capability==='DESCRIBE_SHOT')||null}
 async function refresh(){
-  const [base,status]=await Promise.all([
-    api('state'),
-    request('director-api.php?action=status').catch(()=>({providers:[]}))
-  ]);
+  const [base,status]=await Promise.all([api('state'),request('director-api.php?action=status').catch(()=>({providers:[]}))]);
   state=base.state;config=base.config;providers=status.providers||[];
   renderContext();renderScenes();renderCapabilities();
 }
@@ -41,24 +38,37 @@ function generationButton(s){
   if(job&&['submitted','queued','processing'].includes(job.status))return `<button class="shot-action" data-poll-job="${esc(job.id)}">Check generation</button>`;
   return `<button class="shot-action primary-action" data-generate-shot="${esc(s.id)}">${window.AD_CONFIG?.mock?'Generate mock take':'Generate anime take'}</button>`;
 }
+function referenceBadges(s){
+  const refs=Array.isArray(s.references)?s.references:[];
+  if(!refs.length&&!s.continuity_from_shot_id)return '';
+  const bits=[];
+  if(refs.length)bits.push(`${refs.length} reference${refs.length===1?'':'s'}`);
+  if(s.continuity_from_shot_id)bits.push('continued shot');
+  return `<div class="shot-tags">${bits.map(x=>`<span class="shot-tag">${esc(x)}</span>`).join('')}</div>`;
+}
 function renderScenes(){
   const el=$('#directorScenes'),shots=[...(state?.shots||[])].reverse().slice(0,12);
   if(!shots.length){el.innerHTML='<div class="empty">Your directed shots will appear here. Start by describing a scene above.</div>';return}
   const ref=characterMaster();
-  el.innerHTML=shots.map(s=>{const media=selectedMediaForShot(s);let thumb=ref?.url?`<img src="${esc(ref.url)}" alt="character reference">`:'✦';if(media)thumb=`<video muted playsinline preload="metadata" src="${esc(media)}"></video>`;return `<article class="shot-card"><div class="shot-main"><div class="shot-thumb">${thumb}</div><div class="shot-copy"><div class="shot-number">SHOT ${String(s.number||s.shot_number||'').padStart(2,'0')}</div><strong>${esc(s.title||'Directed shot')}</strong><p>${esc(s.intent||s.direction||'')}</p><div class="shot-tags"><span class="shot-tag">${esc(s.generation_mode||'DESCRIBE_IT')}</span><span class="shot-tag">${esc(s.anime_boost_mode||'natural')}</span><span class="shot-tag">${esc(s.ratio||'')}</span><span class="shot-tag">${esc(s.status||'draft')}</span></div></div><div class="shot-actions">${generationButton(s)}<button class="shot-action" data-open-shot="${esc(s.id)}">Advanced</button></div></div></article>`}).join('');
+  el.innerHTML=shots.map(s=>{const media=selectedMediaForShot(s);let thumb=ref?.url?`<img src="${esc(ref.url)}" alt="character reference">`:'✦';if(media)thumb=`<video muted playsinline preload="metadata" src="${esc(media)}"></video>`;return `<article class="shot-card"><div class="shot-main"><div class="shot-thumb">${thumb}</div><div class="shot-copy"><div class="shot-number">SHOT ${String(s.number||s.shot_number||'').padStart(2,'0')}</div><strong>${esc(s.title||'Directed shot')}</strong><p>${esc(s.intent||s.direction||'')}</p><div class="shot-tags"><span class="shot-tag">${esc(s.anime_boost_mode||'natural')}</span><span class="shot-tag">${esc(s.ratio||'')}</span><span class="shot-tag">${esc(s.status||'draft')}</span></div>${referenceBadges(s)}</div><div class="shot-actions">${generationButton(s)}<button class="shot-action" data-reference-shot="${esc(s.id)}">＋ Reference</button><button class="shot-action" data-revise-shot="${esc(s.id)}">Revise</button><button class="shot-action" data-continue-shot="${esc(s.id)}">Continue</button><button class="shot-action" data-open-shot="${esc(s.id)}">Advanced</button></div></div></article>`}).join('');
   el.querySelectorAll('[data-open-shot]').forEach(b=>b.onclick=()=>location.href=`lab.php#shot-${encodeURIComponent(b.dataset.openShot)}`);
   el.querySelectorAll('[data-generate-shot]').forEach(b=>b.onclick=()=>generateShot(b.dataset.generateShot,b));
   el.querySelectorAll('[data-poll-job]').forEach(b=>b.onclick=()=>pollJob(b.dataset.pollJob,b));
+  el.querySelectorAll('[data-reference-shot]').forEach(b=>b.onclick=()=>attachReference(b.dataset.referenceShot));
+  el.querySelectorAll('[data-revise-shot]').forEach(b=>b.onclick=()=>reviseShot(b.dataset.reviseShot));
+  el.querySelectorAll('[data-continue-shot]').forEach(b=>b.onclick=()=>continueShot(b.dataset.continueShot));
 }
 function renderCapabilities(){
   const caps=capabilitySet(),p=describeProvider();
   const list=[
     ['Character consistency',!!state?.character,'Character Bible'],
     ['Natural-language direction',true,'Director'],
+    ['Shot references',true,'image/video/audio stored per shot'],
+    ['Conversational revisions',true,'re-direct an existing shot'],
+    ['Continue shot',true,'linked continuity from prior shot/take'],
     ['Describe-to-video',!!p,p?`${p.label}${window.AD_CONFIG?.mock?' · mock':' · configured'}`:'provider not configured'],
     ['ACT IT performance',caps.has('ACT_IT'),'Advanced'],
     ['Anime Boost',caps.has('ANIME_BOOST'),'shot direction layer'],
-    ['Continue shot',false,'next production phase'],
     ['Dialogue / lip sync',false,'next production phase'],
     ['Sound design',false,'next production phase']
   ];
@@ -89,6 +99,25 @@ async function submitDirection(){
   addMessage('user',text);input.value='';syncSend();const plan=parseDirection(text),btn=$('#directorSend');btn.disabled=true;document.body.classList.add('loading');
   try{const d=await api('create-shot',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(plan)});addMessage('assistant',assistantReply(plan));await refresh();document.querySelector(`[data-open-shot="${CSS.escape(d.shot.id)}"]`)?.closest('.shot-card')?.scrollIntoView({behavior:'smooth',block:'center'})}
   catch(e){addMessage('assistant',`I couldn't add that shot: ${e.message}`);toast(e.message)}finally{document.body.classList.remove('loading');syncSend()}
+}
+async function attachReference(shotId){
+  const input=document.createElement('input');input.type='file';input.accept='image/jpeg,image/png,image/webp,video/mp4,video/quicktime,audio/mpeg,audio/wav,audio/mp4,audio/aac';
+  input.onchange=async()=>{const file=input.files?.[0];if(!file)return;const fd=new FormData();fd.append('shot_id',shotId);fd.append('reference',file);toast('Uploading reference…');try{const d=await request('director-api.php?action=attach-reference',{method:'POST',body:fd});toast(`${d.reference.kind} reference attached`);addMessage('assistant',`Reference attached to this shot. I’ll keep it with the shot’s direction and continuity context.`);await refresh()}catch(e){toast(e.message)}};
+  input.click();
+}
+async function reviseShot(shotId){
+  const shot=(state?.shots||[]).find(s=>s.id===shotId);if(!shot)return;
+  const text=prompt('What should change in this shot?\n\nExample: Keep everything, but make his expression more afraid.',shot.revision_notes||'');
+  if(text===null||!text.trim())return;const plan=parseDirection(text.trim());
+  addMessage('user',`Revise Shot ${String(shot.number||'').padStart(2,'0')}: ${text.trim()}`);
+  try{await request('director-api.php?action=revise-shot',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({shot_id:shotId,revision_notes:text.trim(),intent:shot.intent,direction:text.trim(),camera_direction:plan.camera_direction,ratio:plan.ratio,boost:plan.boost})});addMessage('assistant','Revision saved on the same shot. The old direction is kept in revision history, and the previous approval is cleared so you can generate a fresh take.');toast('Shot revised');await refresh()}catch(e){toast(e.message)}
+}
+async function continueShot(shotId){
+  const shot=(state?.shots||[]).find(s=>s.id===shotId);if(!shot)return;
+  const text=prompt('What happens immediately after this shot?','Continue naturally from this moment.');
+  if(text===null||!text.trim())return;const plan=parseDirection(text.trim());
+  addMessage('user',`Continue Shot ${String(shot.number||'').padStart(2,'0')}: ${text.trim()}`);
+  try{const d=await request('director-api.php?action=continue-shot',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({shot_id:shotId,title:`Continue: ${shot.title||'shot'}`,intent:text.trim(),direction:text.trim(),camera_direction:plan.camera_direction,ratio:shot.ratio||plan.ratio,boost:plan.boost,duration_target:plan.duration_target})});addMessage('assistant','Continuation created as the next production shot. I linked it to the source shot and latest take so continuity information travels forward instead of becoming an unrelated prompt.');toast('Continuation shot created');await refresh();document.querySelector(`[data-open-shot="${CSS.escape(d.shot.id)}"]`)?.closest('.shot-card')?.scrollIntoView({behavior:'smooth',block:'center'})}catch(e){toast(e.message)}
 }
 async function generateShot(shotId,btn){
   const p=describeProvider();if(!p){toast('No describe-to-video provider is configured.');return}
