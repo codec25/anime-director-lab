@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="assets/css/world-memory.css?v=001">
 <link rel="stylesheet" href="assets/css/semantic-references.css?v=001">
 <link rel="stylesheet" href="assets/css/scene-memory.css?v=001">
-<link rel="stylesheet" href="assets/css/dialogue.css?v=001">
+<link rel="stylesheet" href="assets/css/dialogue.css?v=002">
 </head>
 <body>
 <div class="director-shell">
@@ -23,7 +23,7 @@
     <section class="hero">
       <span class="eyebrow">✦ Director Mode</span>
       <h1><span>Direct the anime</span><br>in your head.</h1>
-      <p>Describe the story, action, camera, mood, dialogue, or change. Anime Director keeps character identity, voice memory, world memory, scene memory, references, and production continuity attached.</p>
+      <p>Describe the story, action, camera, mood, dialogue, or change. Anime Director keeps recurring character identities, separate voices, world memory, scene memory, references, and production continuity attached.</p>
     </section>
 
     <section class="director-card" aria-label="Director prompt">
@@ -44,13 +44,13 @@
     <section class="conversation" id="conversation" aria-live="polite"></section>
 
     <section>
-      <div class="section-head"><div><h2>Your production</h2><p>Latest directed shots. Add dialogue, generate a take here, or open Advanced when a shot needs exact performance driving.</p></div><a class="text-link" href="lab.php#scene">Open scene →</a></div>
+      <div class="section-head"><div><h2>Your production</h2><p>Latest directed shots. Assign dialogue turns to your cast, generate a take here, or open Advanced when a character needs exact performance driving.</p></div><a class="text-link" href="lab.php#scene">Open scene →</a></div>
       <div class="scene-list" id="directorScenes"><div class="empty">Loading production…</div></div>
     </section>
 
     <section class="workspace-grid" style="margin-top:22px">
-      <article class="mini-panel"><h3>Director memory</h3><p>Character identity, Voice Memory, World Memory, and Scene Memory belong to your production, not one AI provider.</p></article>
-      <article class="mini-panel"><h3>Perform it when needed</h3><p>Natural language and generated dialogue are the fast path. For exact mouth, face, gesture, or movement timing, use ACT IT in Advanced.</p></article>
+      <article class="mini-panel"><h3>Director memory</h3><p>Character identities, Voice Memory, World Memory, and Scene Memory belong to your production, not one AI provider.</p></article>
+      <article class="mini-panel"><h3>Perform it when needed</h3><p>Generated dialogue is the fast path. For exact mouth, face, gesture, or movement timing, use one ACT IT / Act-Two performance pass per speaking character in Advanced.</p></article>
     </section>
 
     <section>
@@ -70,6 +70,6 @@
 <script src="assets/js/director.js?v=002"></script>
 <script src="assets/js/world-memory.js?v=001"></script>
 <script src="assets/js/semantic-references.js?v=001"></script>
-<script src="assets/js/dialogue.js?v=001"></script>
+<script src="assets/js/dialogue.js?v=002"></script>
 </body>
 </html>
