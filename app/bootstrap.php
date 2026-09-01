@@ -80,9 +80,7 @@ function ad_base_url(): string {
 
 function ad_public_media_url(string $relativePath): string {
     $relativePath = ltrim(str_replace('\\', '/', $relativePath), '/');
-    if (str_contains($relativePath, '..')) {
-        throw new InvalidArgumentException('Invalid media path.');
-    }
+    if (str_contains($relativePath, '..')) throw new InvalidArgumentException('Invalid media path.');
     return ad_base_url() . '/' . $relativePath;
 }
 
@@ -92,6 +90,7 @@ require_once AD_ROOT . '/app/storage.php';
 require_once AD_ROOT . '/app/providers/ProviderInterface.php';
 require_once AD_ROOT . '/app/providers/RunwayProvider.php';
 require_once AD_ROOT . '/app/providers/RunwayDescribeProvider.php';
+require_once AD_ROOT . '/app/providers/RunwayContinueProvider.php';
 require_once AD_ROOT . '/app/providers/ViduProvider.php';
 require_once AD_ROOT . '/app/providers/KlingProvider.php';
 require_once AD_ROOT . '/app/providers/GoogleProvider.php';
