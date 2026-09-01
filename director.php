@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="assets/css/semantic-references.css?v=001">
 <link rel="stylesheet" href="assets/css/scene-memory.css?v=001">
 <link rel="stylesheet" href="assets/css/dialogue.css?v=002">
+<link rel="stylesheet" href="assets/css/act-two.css?v=001">
 </head>
 <body>
 <div class="director-shell">
@@ -44,13 +45,13 @@
     <section class="conversation" id="conversation" aria-live="polite"></section>
 
     <section>
-      <div class="section-head"><div><h2>Your production</h2><p>Latest directed shots. Assign dialogue turns to your cast, generate a take here, or open Advanced when a character needs exact performance driving.</p></div><a class="text-link" href="lab.php#scene">Open scene →</a></div>
+      <div class="section-head"><div><h2>Your production</h2><p>Latest directed shots. Assign dialogue turns to your cast, generate a take here, or use Precision passes when exact per-character facial performance matters.</p></div><a class="text-link" href="lab.php#scene">Open scene →</a></div>
       <div class="scene-list" id="directorScenes"><div class="empty">Loading production…</div></div>
     </section>
 
     <section class="workspace-grid" style="margin-top:22px">
       <article class="mini-panel"><h3>Director memory</h3><p>Character identities, Voice Memory, World Memory, and Scene Memory belong to your production, not one AI provider.</p></article>
-      <article class="mini-panel"><h3>Perform it when needed</h3><p>Generated dialogue is the fast path. For exact mouth, face, gesture, or movement timing, use one ACT IT / Act-Two performance pass per speaking character in Advanced.</p></article>
+      <article class="mini-panel"><h3>Precision when needed</h3><p>Generated dialogue is the fast path. For exact mouth, face, gesture, or movement timing, create one Act-Two precision pass per speaking character and composite those passes over the common base shot.</p></article>
     </section>
 
     <section>
@@ -71,5 +72,6 @@
 <script src="assets/js/world-memory.js?v=001"></script>
 <script src="assets/js/semantic-references.js?v=001"></script>
 <script src="assets/js/dialogue.js?v=002"></script>
+<script src="assets/js/act-two.js?v=001"></script>
 </body>
 </html>
