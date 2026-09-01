@@ -12,6 +12,7 @@ Canonical creator product:
 - reference-api.php
 - scene-memory-api.php
 - semantic-reference-api.php
+- sound-design-api.php
 - world-api.php
 
 Frontend:
@@ -21,6 +22,7 @@ Frontend:
 - assets/css/director.css
 - assets/css/scene-memory.css
 - assets/css/semantic-references.css
+- assets/css/sound-design.css
 - assets/css/world-memory.css
 - assets/js/act-two.js
 - assets/js/continuity-review.js
@@ -28,6 +30,7 @@ Frontend:
 - assets/js/director.js
 - assets/js/scene-memory.js
 - assets/js/semantic-references.js
+- assets/js/sound-design.js
 - assets/js/world-memory.js
 
 Backend additions/changes:
@@ -80,6 +83,11 @@ Live provider requirements:
 - A shot becomes `ready_to_composite` only after all required Act-Two passes finish. The composite plan keeps the original base take underneath and the per-character passes above it; masking/cropping/feathering remains an explicit verified compositing step rather than unsafe automatic overlap masking.
 - Scene Continuity Review compares generated takes side-by-side and stores per-shot human checks for identity, wardrobe, location, lighting, palette and screen direction.
 - Continuity Review automatically surfaces only metadata facts it can prove: missing takes, scene-memory snapshot drift, dominant aspect-ratio mismatch, unvoiced dialogue and incomplete precision passes. It does not claim visual AI detection unless a real vision-comparison provider is added later.
+- Sound Design is deliberately placed after Continuity Review: keep/fix the picture first, then build editorial audio.
+- Scene Bed stores continuous room tone / ambience for a scene; Music Cue stores scene-level score intent and behavior; Shot SFX/Foley stores timed per-shot sound events.
+- Sound Design uses Runway Seed Audio via `/v1/sound_effect` with `seed_audio`, MP3 output and 48 kHz sample rate. Seed Audio supports rich audio scenes and sound effects; exact final duration/timing is editorial metadata and will be trimmed/looped/crossfaded during final assembly.
+- Generated ambience/music/SFX remain editorial audio assets and are not automatically injected back into visual generation.
+- Seed Audio is currently billed at 0.25 credits per generated second with a 5-credit minimum per generation according to Runway's API changelog/pricing.
 - Native continuation uses the previous generated video and requires a provider-fetchable public HTTPS URL.
 - Seedance 2.5 input/reference videos must be at least 480p.
 
