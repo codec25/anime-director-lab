@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="assets/css/director.css?v=002">
 <link rel="stylesheet" href="assets/css/world-memory.css?v=001">
 <link rel="stylesheet" href="assets/css/semantic-references.css?v=001">
+<link rel="stylesheet" href="assets/css/scene-memory.css?v=001">
 </head>
 <body>
 <div class="director-shell">
@@ -21,7 +22,7 @@
     <section class="hero">
       <span class="eyebrow">✦ Director Mode</span>
       <h1><span>Direct the anime</span><br>in your head.</h1>
-      <p>Describe the story, action, camera, mood, or change. Anime Director turns your direction into shots while keeping character identity, world memory, references, and production continuity attached.</p>
+      <p>Describe the story, action, camera, mood, or change. Anime Director turns your direction into shots while keeping character identity, world memory, scene memory, references, and production continuity attached.</p>
     </section>
 
     <section class="director-card" aria-label="Director prompt">
@@ -47,7 +48,7 @@
     </section>
 
     <section class="workspace-grid" style="margin-top:22px">
-      <article class="mini-panel"><h3>Director memory</h3><p>Character identity and World Memory belong to your production, not one AI provider. Shot direction stays attached even if the generation provider changes.</p></article>
+      <article class="mini-panel"><h3>Director memory</h3><p>Character identity, World Memory, and Scene Memory belong to your production, not one AI provider. Shot direction stays attached even if the generation provider changes.</p></article>
       <article class="mini-panel"><h3>Perform it when needed</h3><p>Natural language is the fast path. For movement-critical animation, use ACT IT in Advanced and drive the character from your own performance.</p></article>
     </section>
 
@@ -64,6 +65,7 @@
   <a href="lab.php"><span class="nav-icon">▦</span><span>Advanced</span></a>
 </nav>
 <script>window.AD_CONFIG={mock:<?= ad_mock_mode() ? 'true' : 'false' ?>};</script>
+<script src="assets/js/scene-memory.js?v=001"></script>
 <script src="assets/js/director.js?v=002"></script>
 <script src="assets/js/world-memory.js?v=001"></script>
 <script src="assets/js/semantic-references.js?v=001"></script>
