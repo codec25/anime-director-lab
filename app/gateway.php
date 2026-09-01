@@ -12,7 +12,7 @@ function ad_capabilities(): array {
         'ANIMATE_SHOT' => 'Animate a shot from approved direction.',
         'DESCRIBE_SHOT' => 'Text/direction-driven shot generation.',
         'DIALOGUE' => 'Dialogue-driven performance assist (not wired).',
-        'CONTINUE_SHOT' => 'Continue motion from a prior take (not wired).',
+        'CONTINUE_SHOT' => 'Continue a generated video into the next directed shot.',
         'LIP_SYNC' => 'Lip sync assist (not wired).',
         'ANIME_BOOST' => 'Stylized amplification layer over preserved performance.',
         'SOUND_EFFECT' => 'Impact/SFX direction (editable-effects future).',
@@ -41,6 +41,17 @@ function ad_provider_registry(): array {
             'cost_per_second_usd' => 0.12,
             'best_for' => 'Natural-language anime shot generation from text or a locked reference image',
             'limitations' => '2–10s per generation. Text-only is landscape/portrait; image-to-video supports more ratios.',
+            'implemented' => true,
+        ],
+        'runway_seedance25_extend' => [
+            'class' => RunwayContinueProvider::class,
+            'label' => 'Runway Seedance 2.5 Extend',
+            'binding_key' => 'runway',
+            'capabilities' => ['CONTINUE_SHOT', 'ANIMATE_SHOT'],
+            'model' => 'seedance2_5',
+            'cost_per_second_usd' => 0.30,
+            'best_for' => 'Native video continuation from the previous generated take',
+            'limitations' => 'Video-to-video extend; 4–30s output. Uses the source video as continuity input and preserves its aspect ratio.',
             'implemented' => true,
         ],
         'vidu_motion_2_5' => [
@@ -92,9 +103,7 @@ function ad_provider_registry(): array {
 
 function ad_provider_instance(string $providerId): ADProvider {
     $registry = ad_provider_registry();
-    if (!isset($registry[$providerId])) {
-        throw new InvalidArgumentException('Unknown provider.');
-    }
+    if (!isset($registry[$providerId])) throw new InvalidArgumentException('Unknown provider.');
     $class = $registry[$providerId]['class'];
     /** @var ADProvider $provider */
     $provider = new $class();
@@ -130,20 +139,13 @@ function ad_gateway_catalog(): array {
 
 function ad_providers_for_capability(string $capability): array {
     $capability = strtoupper($capability);
-    return array_values(array_filter(
-        ad_gateway_catalog(),
-        static fn(array $p): bool => in_array($capability, $p['capabilities'], true)
-    ));
+    return array_values(array_filter(ad_gateway_catalog(), static fn(array $p): bool => in_array($capability, $p['capabilities'], true)));
 }
 
 function ad_safe_provider_error(Throwable $e): array {
     $message = ad_substr($e->getMessage(), 0, 400);
-    // Never echo env/key material.
     $message = preg_replace('/(api[_-]?key|bearer|token|authorization)\s*[:=]\s*\S+/i', '$1=[redacted]', $message) ?? $message;
-    return [
-        'error_code' => 'PROVIDER_ERROR',
-        'safe_error' => $message,
-    ];
+    return ['error_code' => 'PROVIDER_ERROR', 'safe_error' => $message];
 }
 
 function ad_require_live_public_https_url(string $url): void {
@@ -151,27 +153,17 @@ function ad_require_live_public_https_url(string $url): void {
     $parts = parse_url($url);
     $scheme = strtolower((string)($parts['scheme'] ?? ''));
     $host = strtolower((string)($parts['host'] ?? ''));
-    if (
-        $url === ''
-        || $scheme !== 'https'
-        || $host === ''
-        || $host === 'localhost'
-        || $host === '127.0.0.1'
-        || $host === '[::1]'
-        || $host === '::1'
-    ) {
-        throw new RuntimeException('Live providers require public HTTPS character and performance URLs. Deploy the lab or configure ANIME_DIRECTOR_BASE_URL.');
+    if ($url === '' || $scheme !== 'https' || $host === '' || $host === 'localhost' || $host === '127.0.0.1' || $host === '[::1]' || $host === '::1') {
+        throw new RuntimeException('Live providers require public HTTPS media URLs. Deploy the app or configure ANIME_DIRECTOR_BASE_URL.');
     }
 }
 
-/** Live ACT_IT media must be externally fetchable HTTPS URLs. Mock mode skips this. */
 function ad_assert_live_media_urls(string $characterUrl, string $performanceUrl): void {
     if (ad_mock_mode()) return;
     ad_require_live_public_https_url($characterUrl);
     ad_require_live_public_https_url($performanceUrl);
 }
 
-/** Count only provider-accepted jobs (those with a real task id). */
 function ad_provider_accepted_attempts(array $state, string $shotId, string $providerId): int {
     $count = 0;
     foreach ($state['jobs'] as $j) {
@@ -183,8 +175,6 @@ function ad_provider_accepted_attempts(array $state, string $shotId, string $pro
 }
 
 function ad_shot_has_takes(array $state, string $shotId): bool {
-    foreach ($state['takes'] as $t) {
-        if (($t['shot_id'] ?? '') === $shotId) return true;
-    }
+    foreach ($state['takes'] as $t) if (($t['shot_id'] ?? '') === $shotId) return true;
     return false;
 }
