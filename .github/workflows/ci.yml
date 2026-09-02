@@ -64,3 +64,19 @@ jobs:
       - name: End-to-end production flow
         shell: bash
         run: bash tests/production-flow-smoke.sh
+
+      - name: Package full source
+        shell: bash
+        run: |
+          set -euo pipefail
+          zip -qr anime-director-full.zip . \
+            -x '.git/*' \
+            -x 'anime-director-full.zip'
+
+      - name: Upload full source package
+        uses: actions/upload-artifact@v4
+        with:
+          name: anime-director-full
+          path: anime-director-full.zip
+          if-no-files-found: error
+          retention-days: 7
