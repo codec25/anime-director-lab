@@ -47,16 +47,13 @@ function build(base,continuity,sound,timeline){
  return{issues,stages,hasShots:shots.length>0}
 }
 function ensure(){
- const nav=$('#productionStageNav');if(!nav)return false;
- if(!$('#productionReadiness')){const b=document.createElement('button');b.id='productionReadiness';b.className='production-readiness';b.type='button';b.innerHTML='<span class="readiness-dot"></span><span id="readinessLabel">Checking production…</span><span aria-hidden="true">›</span>';nav.insertAdjacentElement('afterend',b);b.onclick=openSheet}
  if(!$('#readinessDialog')){const d=document.createElement('dialog');d.id='readinessDialog';d.className='readiness-dialog';d.innerHTML='<div class="readiness-sheet"><div class="readiness-head"><div><span>PRODUCTION STATUS</span><h2>Film readiness</h2></div><button class="shot-action" type="button" data-close-readiness>Done</button></div><div id="readinessList"></div></div>';document.body.append(d);d.querySelector('[data-close-readiness]').onclick=()=>d.close();d.addEventListener('click',e=>{if(e.target===d)d.close()});d.addEventListener('click',route)}
  return true
 }
 function paint(){
- if(!ensure())return;const n=result.issues.length,label=$('#readinessLabel'),button=$('#productionReadiness');
- label.textContent=!result.hasShots?'Start with your first shot':n?`${n} item${n===1?'':'s'} need attention`:'Ready to finish';
- button.dataset.state=!result.hasShots?'active':n?'attention':'ready';
- document.querySelectorAll('#productionStageNav [data-stage]').forEach(b=>b.dataset.readiness=result.stages[b.dataset.stage]||'pending')
+ ensure();const n=result.issues.length,button=$('[data-open-readiness]');if(!button)return;const copy=button.querySelector('small');
+ if(copy)copy.textContent=!result.hasShots?'Start with your first shot':n?`${n} item${n===1?'':'s'} need attention`:'Ready for final review';
+ button.dataset.state=!result.hasShots?'active':n?'attention':'ready'
 }
 function renderList(){
  const box=$('#readinessList'),items=result.issues;if(!box)return;
@@ -65,8 +62,8 @@ function renderList(){
 function escapeHtml(s){return String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 async function refresh(force=false){const now=Date.now();if(!force&&now-lastRefresh<800)return;lastRefresh=now;try{const [base,continuity,sound,timeline]=await Promise.all([get('api.php?action=state'),get('continuity-review-api.php?action=state').catch(()=>({scenes:[]})),get('sound-design-api.php?action=state').catch(()=>({scenes:[]})),get('timeline-api.php?action=state').catch(()=>({ffmpeg_available:null}))]);result=build(base,continuity,sound,timeline);paint()}catch(e){if(ensure())$('#readinessLabel').textContent='Readiness unavailable'}}
 async function openSheet(){await refresh(true);renderList();$('#readinessDialog')?.showModal()}
-function route(e){const b=e.target.closest('[data-readiness-index]');if(!b)return;const x=result.issues[Number(b.dataset.readinessIndex)];if(!x)return;$('#readinessDialog')?.close();document.querySelector(`#productionStageNav [data-stage="${x.stage}"]`)?.click();setTimeout(()=>{let target=x.selector?$(x.selector):null;if(target?.matches?.('[data-open-shot]'))target=target.closest('.shot-card');target?.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});if(x.action==='dialogue')target?.querySelector('[data-dialogue-shot]')?.click();if(x.action==='acting')target?.querySelector('[data-acttwo-shot]')?.click();if(x.action==='compare')target?.querySelector('[data-compare-takes]')?.click()},180)}
+function route(e){const b=e.target.closest('[data-readiness-index]');if(!b)return;const x=result.issues[Number(b.dataset.readinessIndex)];if(!x)return;$('#readinessDialog')?.close();document.dispatchEvent(new CustomEvent('ad:open-workspace',{detail:{stage:x.stage}}));setTimeout(()=>{let target=x.selector?$(x.selector):null;if(target?.matches?.('[data-open-shot]'))target=target.closest('.shot-card');target?.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});if(x.action==='dialogue')target?.querySelector('[data-dialogue-shot]')?.click();if(x.action==='acting')target?.querySelector('[data-acttwo-shot]')?.click();if(x.action==='compare')target?.querySelector('[data-compare-takes]')?.click()},180)}
 function schedule(){clearTimeout(timer);timer=setTimeout(refresh,160)}
-function boot(){ensure();refresh();document.addEventListener('ad:state-changed',schedule);document.addEventListener('ad:take-selected',schedule);document.addEventListener('click',e=>{if(e.target.closest('[data-stage]'))schedule()},true);document.addEventListener('ad:ui-updated',()=>{if(!$('#productionReadiness'))ensure()})}
+function boot(){ensure();refresh();document.addEventListener('ad:state-changed',schedule);document.addEventListener('ad:take-selected',schedule);document.addEventListener('ad:open-readiness',openSheet);document.addEventListener('ad:ui-updated',()=>{ensure();paint()})}
 document.addEventListener('DOMContentLoaded',boot);
 })();
