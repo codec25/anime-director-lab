@@ -2,36 +2,38 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Anime Director Lab</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#111117"><meta name="color-scheme" content="dark"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Anime Director"><meta name="application-name" content="Anime Director">
+<title>Anime Director · Advanced</title>
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="assets/css/app.css?v=002">
+<link rel="stylesheet" href="assets/css/advanced-product.css?v=001">
 </head>
 <body>
 <div class="shell">
 <header class="topbar">
-  <div>
-    <span class="eyebrow">ADVANCED WORKSPACE</span>
-    <h1>Anime Director Lab</h1>
-    <p class="tagline">Character control, performance driving, takes, scene review.</p>
+  <div class="advanced-brand">
+    <span class="advanced-brand-mark">AD</span>
+    <div class="advanced-brand-copy"><h1>Anime Director</h1><small>Advanced</small></div>
   </div>
-  <div class="top-actions"><a class="btn ghost" href="director.php">Director</a><span id="modeBadge" class="badge">Loading…</span><button id="refreshBtn" class="btn ghost">Refresh</button></div>
+  <div class="top-actions"><a class="btn ghost" href="director.php">← Director</a><span id="modeBadge" class="badge">Loading…</span><button id="refreshBtn" class="btn ghost">Refresh</button></div>
 </header>
 
-<nav class="steps" aria-label="Lab workflow">
+<nav class="steps" aria-label="Advanced filmmaking tools">
   <button data-jump="character">1 <span>Character</span></button>
   <button data-jump="performance">2 <span>Perform</span></button>
   <button data-jump="shot">3 <span>Shot</span></button>
   <button data-jump="takes">4 <span>Takes</span></button>
   <button data-jump="scene">5 <span>Scene</span></button>
-  <button data-jump="benchmark">6 <span>Benchmark</span></button>
+  <button data-jump="benchmark">6 <span>Quality</span></button>
 </nav>
+<div class="advanced-note"><strong>Advanced stays underneath Director.</strong> Use these controls only when a shot needs precise identity, performance, take, or diagnostic control.</div>
 
 <main>
 <section class="hero panel">
   <div>
     <span class="kicker">ADVANCED CONTROL</span>
-    <h2>Use this when a shot needs more than a conversation.</h2>
-    <p>Lock character identity, drive exact movement with ACT IT, compare generated takes, and inspect the production underneath Director Mode.</p>
+    <h2>Go deeper without leaving the same movie.</h2>
+    <p>Lock identity, drive exact movement, compare takes, and inspect production details. Normal filmmaking still happens in Director.</p>
   </div>
   <div class="hero-stats">
     <div><strong id="statPerformances">0</strong><span>performances</span></div>
@@ -80,7 +82,7 @@
 </section>
 
 <section id="performance" class="panel">
-  <div class="section-title"><span>02</span><div><h3>ACT IT — Performance Library</h3><p>Record the action yourself when exact body motion matters.</p></div></div>
+  <div class="section-title"><span>02</span><div><h3>Performance Library</h3><p>Record the action yourself when exact body or facial performance matters.</p></div></div>
   <div class="split">
     <form id="performanceForm" class="form-card inset">
       <div class="row">
@@ -99,7 +101,7 @@
 
 <section id="shot" class="workspace-grid">
   <div class="panel">
-    <div class="section-title"><span>03</span><div><h3>Advanced shot setup</h3><p>Use ACT IT for performance-driven shots. Director Mode handles conversational DESCRIBE IT shots.</p></div></div>
+    <div class="section-title"><span>03</span><div><h3>Advanced shot setup</h3><p>Use performance-driven generation when conversational direction is not precise enough.</p></div></div>
     <form id="shotForm" class="form-card">
       <label>Title<input name="title" placeholder="A1 Neutral hold"></label>
       <label id="shotPerformanceLabel">Performance<select id="shotPerformance" name="performance_id"></select></label>
@@ -117,7 +119,7 @@
     </form>
   </div>
   <div class="panel">
-    <div class="section-title"><span>AI</span><div><h3>Capability gateway</h3><p>Providers stay replaceable. Character and shot intent stay owned by Anime Director.</p></div></div>
+    <div class="section-title"><span>AI</span><div><h3>Provider diagnostics</h3><p>Providers remain replaceable; the movie stays owned by Anime Director.</p></div></div>
     <div id="providerBench" class="provider-bench"></div>
     <div class="boost-note">
       <strong>Anime Boost layers</strong>
@@ -128,7 +130,7 @@
 </section>
 
 <section id="takes" class="panel">
-  <div class="section-title"><span>04</span><div><h3>Takes</h3><p>Compare generated executions and choose the one that belongs in the scene.</p></div></div>
+  <div class="section-title"><span>04</span><div><h3>Takes</h3><p>Compare generated executions and choose the one that belongs in the movie.</p></div></div>
   <div id="shotsList" class="shot-list"></div>
 </section>
 
@@ -144,7 +146,7 @@
   <div id="scoreEditor" class="score-editor empty-state">Select a take to score it.</div>
 </section>
 </main>
-<footer><span>Anime Director · Advanced Workspace</span><a href="director.php">Back to Director</a></footer>
+<footer><span>Anime Director · Advanced</span><a href="director.php">Back to Director</a></footer>
 </div>
 <script>window.AD_CONFIG={mock:<?= ad_mock_mode() ? 'true' : 'false' ?>};</script>
 <script src="assets/js/app.js?v=002"></script>
