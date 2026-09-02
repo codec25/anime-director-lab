@@ -1,0 +1,13 @@
+{
+  "name": "Anime Director",
+  "short_name": "Director",
+  "description": "Direct, perform, review and finish AI-assisted anime films.",
+  "start_url": "./director.php",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#0d0d12",
+  "theme_color": "#0d0d12",
+  "orientation": "any",
+  "categories": ["photo", "video", "productivity"]
+}
