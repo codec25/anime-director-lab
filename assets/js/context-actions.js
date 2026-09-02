@@ -3,6 +3,7 @@
 const $=(s,r=document)=>r.querySelector(s);
 let menu=null,activeCard=null,longTimer=null,startX=0,startY=0;
 const labels=[
+ ['compare-takes','Compare takes'],
  ['reference-shot','Add reference'],
  ['revise-shot','Revise shot'],
  ['continue-shot','Continue story'],
