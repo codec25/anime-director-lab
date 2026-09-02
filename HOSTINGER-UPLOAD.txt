@@ -34,7 +34,6 @@ Frontend:
 - assets/css/first-run-character.css
 - assets/css/conversational-edit.css
 - assets/css/generation-experience.css
-- assets/css/memory-disclosure.css
 - assets/css/memory-sheets.css
 - assets/css/production-readiness.css
 - assets/css/production-stages.css
@@ -58,7 +57,6 @@ Frontend:
 - assets/js/first-run-character.js
 - assets/js/conversational-edit.js
 - assets/js/generation-experience.js
-- assets/js/memory-disclosure.js
 - assets/js/memory-sheets.js
 - assets/js/production-readiness.js
 - assets/js/production-stages.js
@@ -84,6 +82,7 @@ Backend additions/changes:
 
 CI / repository validation:
 - .github/workflows/ci.yml
+- tests/director-surface-audit.php
 
 Server routing/docs:
 - .htaccess
@@ -122,7 +121,7 @@ Director UX:
 - In Finish, sequence order and Render remain first-class. Per-clip trim/transition controls are collapsed under Edit clip; Audio tracks and Mix & master are collapsed secondary sections.
 - Rebuild from approved takes, edit-plan download, continuity Re-direct and Precision acting are visually demoted power actions rather than competing with the stage's primary action.
 - Production Readiness provides one compact status control, stage indicators, dialogue-duration warnings and direct routing to blocking issues.
-- Dynamic UI organization uses one shared observer plus explicit shot-render events instead of multiple modules observing and rescanning the same DOM.
+- Dynamic UI organization uses one shared observer plus explicit shot-render events instead of multiple modules observing and rescanning the same DOM. CI enforces that single-observer ownership and rejects duplicate, missing or retired active assets.
 - Dialogue voice, Precision Acting, scene sound and final export failures use explicit recoverable states; retries preserve approved takes, timing and sound plans.
 - Production Readiness routes failed dialogue voices, performance passes and sound jobs back to their existing contextual controls without adding permanent panels.
 - No backend feature is removed by progressive disclosure; existing DOM controls and event handlers are moved into focused sheets so behavior stays intact.
@@ -137,7 +136,7 @@ Apple / iPhone readiness:
 - VisualViewport reduces keyboard-open shell spacing so the iPhone keyboard does not compete with the Director prompt.
 - Production-stage buttons expose pressed/current-step accessibility state.
 - `manifest.webmanifest` enables a standalone installable web-app shell.
-- `sw.js` caches static CSS/JS only; it deliberately does not cache PHP pages or API routes, preventing stale production state.
+- `sw.js` uses network-first static CSS/JS with an offline cache fallback; it deliberately does not cache PHP pages or API routes, preventing stale UI code and production state.
 - Final App Store packaging can later use the same PHP/API backend with a Capacitor/native shell. Xcode/macOS are still required only for final iOS compilation, signing, TestFlight and App Store submission.
 - A final production app icon / Apple touch icon is intentionally not fabricated in code; add the approved brand artwork before store submission.
 
