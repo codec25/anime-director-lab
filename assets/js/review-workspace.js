@@ -16,6 +16,6 @@ function apply(){
  continuity.classList.toggle('review-workspace-hidden',view!=='continuity');sound.classList.toggle('review-workspace-hidden',view!=='sound');
  bar.querySelectorAll('[data-review-view]').forEach(b=>{const active=b.dataset.reviewView===view;b.classList.toggle('active',active);b.setAttribute('aria-selected',active?'true':'false');b.tabIndex=active?0:-1});
 }
-function boot(){apply();const root=$('main')||document.body;new MutationObserver(()=>{clearTimeout(timer);timer=setTimeout(apply,60)}).observe(root,{childList:true,subtree:true})}
+function boot(){apply();document.addEventListener('ad:ui-updated',apply)}
 document.addEventListener('DOMContentLoaded',boot);
 })();
