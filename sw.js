@@ -1,0 +1,5 @@
+const CACHE='anime-director-shell-v1';
+const STATIC=['./assets/css/director.css','./assets/css/production-stages.css','./assets/css/apple-ready.css','./assets/js/production-stages.js','./assets/js/apple-ready.js'];
+self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(c=>c.addAll(STATIC)).catch(()=>{}));self.skipWaiting()});
+self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE&&k.startsWith('anime-director-shell-')).map(k=>caches.delete(k)))));self.clients.claim()});
+self.addEventListener('fetch',event=>{const req=event.request;if(req.method!=='GET')return;const url=new URL(req.url);if(url.origin!==location.origin)return;if(url.pathname.endsWith('.php')||url.pathname.includes('-api.php')||url.pathname.endsWith('/api.php'))return;event.respondWith(caches.match(req).then(hit=>hit||fetch(req).then(res=>{if(res.ok&&(url.pathname.includes('/assets/css/')||url.pathname.includes('/assets/js/'))){const copy=res.clone();caches.open(CACHE).then(c=>c.put(req,copy)).catch(()=>{})}return res}).catch(()=>hit))) });
