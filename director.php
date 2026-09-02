@@ -71,23 +71,24 @@
   </main>
 </div>
 <script>window.AD_CONFIG={mock:<?= ad_mock_mode() ? 'true' : 'false' ?>};</script>
+<script src="assets/js/ui-observer.js?v=001"></script>
 <script src="assets/js/scene-memory.js?v=001"></script>
-<script src="assets/js/director.js?v=006"></script>
-<script src="assets/js/world-memory.js?v=001"></script>
-<script src="assets/js/semantic-references.js?v=001"></script>
-<script src="assets/js/dialogue.js?v=002"></script>
-<script src="assets/js/act-two.js?v=001"></script>
+<script src="assets/js/director.js?v=007"></script>
+<script src="assets/js/world-memory.js?v=002"></script>
+<script src="assets/js/semantic-references.js?v=002"></script>
+<script src="assets/js/dialogue.js?v=003"></script>
+<script src="assets/js/act-two.js?v=002"></script>
 <script src="assets/js/continuity-review.js?v=002"></script>
 <script src="assets/js/sound-design.js?v=001"></script>
 <script src="assets/js/timeline.js?v=004"></script>
-<script src="assets/js/review-workspace.js?v=001"></script>
-<script src="assets/js/production-stages.js?v=004"></script>
+<script src="assets/js/review-workspace.js?v=002"></script>
+<script src="assets/js/production-stages.js?v=005"></script>
 <script src="assets/js/apple-ready.js?v=001"></script>
-<script src="assets/js/context-actions.js?v=002"></script>
+<script src="assets/js/context-actions.js?v=003"></script>
 <script src="assets/js/take-compare.js?v=001"></script>
-<script src="assets/js/progressive-disclosure.js?v=001"></script>
-<script src="assets/js/memory-disclosure.js?v=001"></script>
-<script src="assets/js/memory-sheets.js?v=001"></script>
-<script src="assets/js/production-readiness.js?v=001"></script>
+<script src="assets/js/progressive-disclosure.js?v=002"></script>
+<script src="assets/js/memory-disclosure.js?v=002"></script>
+<script src="assets/js/memory-sheets.js?v=002"></script>
+<script src="assets/js/production-readiness.js?v=002"></script>
 </body>
 </html>
