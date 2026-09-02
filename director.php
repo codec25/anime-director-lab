@@ -25,6 +25,7 @@
 <link rel="stylesheet" href="assets/css/timeline.css?v=001">
 <link rel="stylesheet" href="assets/css/production-stages.css?v=002">
 <link rel="stylesheet" href="assets/css/apple-ready.css?v=001">
+<link rel="stylesheet" href="assets/css/context-actions.css?v=001">
 </head>
 <body>
 <div class="director-shell">
@@ -58,7 +59,7 @@
     <section class="conversation" id="conversation" aria-live="polite"></section>
 
     <section id="productionStageShots">
-      <div class="section-head"><div><h2>Your production</h2><p>Direct and generate here. In Perform, the same shots expose dialogue and precision acting controls without changing the production order.</p></div><a class="text-link" href="lab.php#scene">Advanced →</a></div>
+      <div class="section-head"><div><h2>Your production</h2><p>Direct and generate here. Right-click a shot on desktop, or long-press / use ••• on touch, for secondary actions.</p></div><a class="text-link" href="lab.php#scene">Advanced →</a></div>
       <div class="scene-list" id="directorScenes"><div class="empty">Loading production…</div></div>
     </section>
   </main>
@@ -81,5 +82,6 @@
 <script src="assets/js/timeline.js?v=001"></script>
 <script src="assets/js/production-stages.js?v=001"></script>
 <script src="assets/js/apple-ready.js?v=001"></script>
+<script src="assets/js/context-actions.js?v=001"></script>
 </body>
 </html>
