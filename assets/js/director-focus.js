@@ -1,34 +1,20 @@
 (()=>{
 'use strict';
 const $=(s,r=document)=>r.querySelector(s);
-function focusPrompt(seed=''){
- const input=$('#directorPrompt'); if(!input)return;
- if(seed) input.value=seed;
- input.placeholder='What happens next? Direct the action, camera, emotion, dialogue or mood…';
- input.focus({preventScroll:false});
- input.dispatchEvent(new Event('input',{bubbles:true}));
- input.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});
-}
+let appState=null,continuityState=null;
+async function json(url){const r=await fetch(url);const d=await r.json().catch(()=>null);return r.ok?d:null}
+function focusPrompt(seed=''){const input=$('#directorPrompt');if(!input)return;if(seed)input.value=seed;input.placeholder='What happens next? Direct the action, camera, emotion, dialogue or mood…';input.focus({preventScroll:false});input.dispatchEvent(new Event('input',{bubbles:true}));input.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'})}
 function workspace(stage){document.dispatchEvent(new CustomEvent('ad:open-workspace',{detail:{stage}}))}
-function patch(){
- const cards=[...document.querySelectorAll('#directorScenes .shot-card')];
- cards.forEach(c=>c.classList.remove('director-current-shot'));
- const card=cards[0]; if(!card)return;
- card.classList.add('director-current-shot');
- const main=card.querySelector('.shot-main'); if(!main||card.querySelector('.director-next-actions'))return;
- const media=card.querySelector('.shot-thumb video');
- const takeReady=!!media;
- const bar=document.createElement('div'); bar.className='director-next-actions';
- bar.innerHTML=`<div class="director-next-copy"><span>${takeReady?'CURRENT SHOT · APPROVED TAKE':'CURRENT SHOT'}</span><strong>${takeReady?'What happens next?':'Make this shot.'}</strong></div><div class="director-next-buttons">${takeReady?'<button type="button" data-focus-continue>Continue</button><button type="button" data-focus-camera>Camera</button><button type="button" data-focus-performance>Performance</button><button type="button" data-focus-dialogue>Dialogue</button>':''}<button type="button" data-focus-more aria-label="More shot controls">•••</button></div>`;
- main.append(bar);
- bar.querySelector('[data-focus-continue]')?.addEventListener('click',()=>focusPrompt('Continue naturally from this moment. '));
- bar.querySelector('[data-focus-camera]')?.addEventListener('click',()=>focusPrompt('Keep everything consistent. Change the camera to '));
- bar.querySelector('[data-focus-performance]')?.addEventListener('click',()=>{workspace('perform');setTimeout(()=>card.querySelector('[data-acttwo-shot]')?.click(),180)});
- bar.querySelector('[data-focus-dialogue]')?.addEventListener('click',()=>{workspace('perform');setTimeout(()=>card.querySelector('[data-dialogue-shot]')?.click(),180)});
- bar.querySelector('[data-focus-more]')?.addEventListener('click',()=>card.querySelector('.shot-more')?.click());
- const title=$('#shotSectionTitle'); if(title)title.textContent=takeReady?'Current shot':'Your film';
- if(takeReady){const input=$('#directorPrompt');if(input)input.placeholder='What happens next? Direct the action, camera, emotion, dialogue or mood…'}
-}
-function boot(){patch();document.addEventListener('ad:shots-rendered',()=>requestAnimationFrame(patch));document.addEventListener('ad:ui-updated',()=>requestAnimationFrame(patch))}
+function shotId(card){return card.querySelector('[data-open-shot]')?.dataset.openShot||card.querySelector('[data-continue-shot]')?.dataset.continueShot||''}
+function shotState(id){return(appState?.shots||[]).find(s=>s.id===id)||null}
+function usableTakes(id){return(appState?.takes||[]).filter(t=>t.shot_id===id&&(t?.local?.url||t?.result_media?.local?.url||t?.remote_url||t?.result_media?.remote_url))}
+function continuityShot(id){for(const scene of continuityState?.scenes||[]){const s=(scene.shots||[]).find(x=>x.id===id);if(s)return s}return null}
+function hasDialogue(s){return !!((s?.dialogue?.lines||s?.dialogue_lines||[]).length||s?.dialogue?.text||s?.dialogue_text)}
+function hasSound(s){const sd=s?.sound_design||{};return !!(sd.ambience_asset||sd.music_asset||(sd.cues||[]).some(c=>c.asset||c.status==='completed'))}
+function intelligence(card,id,ready){if(!ready)return{note:'Make this shot.',actions:[]};const s=shotState(id),takes=usableTakes(id),cs=continuityShot(id),warnings=cs?.warnings||[];if(warnings.length)return{note:'Continuity needs attention.',actions:[['Fix continuity','continuity'],['Continue','continue'],['Camera','camera']]};if(takes.length>1)return{note:'You have another take to compare.',actions:[['Compare takes','compare'],['Continue','continue'],['Camera','camera']]};if(hasDialogue(s))return{note:'Shape the performance or keep the story moving.',actions:[['Performance','performance'],['Continue','continue'],['Camera','camera']]};if(!hasSound(s)&&(appState?.shots||[]).length>1)return{note:'The scene is taking shape.',actions:[['Continue','continue'],['Add sound','sound'],['Finish film','finish']]};return{note:'What happens next?',actions:[['Continue','continue'],['Camera','camera'],['Performance','performance'],['Dialogue','dialogue']]}}
+function act(card,type){if(type==='continue')return focusPrompt('Continue naturally from this moment. ');if(type==='camera')return focusPrompt('Keep everything consistent. Change the camera to ');if(type==='performance'){workspace('perform');return setTimeout(()=>card.querySelector('[data-acttwo-shot]')?.click(),180)}if(type==='dialogue'){workspace('perform');return setTimeout(()=>card.querySelector('[data-dialogue-shot]')?.click(),180)}if(type==='compare')return card.querySelector('[data-compare-takes]')?.click();if(type==='continuity')return workspace('review');if(type==='sound'){workspace('review');return setTimeout(()=>$('#soundDesignPanel')?.scrollIntoView({behavior:'smooth',block:'start'}),180)}if(type==='finish')return workspace('finish')}
+function patch(){const cards=[...document.querySelectorAll('#directorScenes .shot-card')];cards.forEach(c=>{c.classList.remove('director-current-shot');c.querySelector('.director-next-actions')?.remove()});const card=cards[0];if(!card)return;card.classList.add('director-current-shot');const main=card.querySelector('.shot-main');if(!main)return;const media=card.querySelector('.shot-thumb video'),ready=!!media,id=shotId(card),smart=intelligence(card,id,ready);const bar=document.createElement('div');bar.className='director-next-actions';bar.innerHTML=`<div class="director-next-copy"><span>${ready?'DIRECTOR · CURRENT SHOT':'CURRENT SHOT'}</span><strong>${smart.note}</strong></div><div class="director-next-buttons">${smart.actions.map(([label,type])=>`<button type="button" data-director-action="${type}">${label}</button>`).join('')}<button type="button" data-focus-more aria-label="More shot controls">•••</button></div>`;main.append(bar);bar.querySelectorAll('[data-director-action]').forEach(b=>b.addEventListener('click',()=>act(card,b.dataset.directorAction)));bar.querySelector('[data-focus-more]')?.addEventListener('click',()=>card.querySelector('.shot-more')?.click());const title=$('#shotSectionTitle');if(title)title.textContent=ready?'Current shot':'Your film';if(ready){const input=$('#directorPrompt');if(input)input.placeholder='What happens next? Direct the action, camera, emotion, dialogue or mood…'}}
+async function refreshIntelligence(){const [a,c]=await Promise.all([json('api.php?action=state'),json('continuity-review-api.php?action=state')]);appState=a?.state||a||appState;continuityState=c||continuityState;patch()}
+function boot(){refreshIntelligence();document.addEventListener('ad:shots-rendered',()=>requestAnimationFrame(()=>refreshIntelligence()));document.addEventListener('ad:state-changed',()=>requestAnimationFrame(()=>refreshIntelligence()));document.addEventListener('ad:take-selected',()=>requestAnimationFrame(()=>refreshIntelligence()))}
 document.addEventListener('DOMContentLoaded',boot);
 })();
