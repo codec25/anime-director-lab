@@ -89,6 +89,8 @@ Existing shared files still required on the server:
 Do not upload `.env` from Git. Keep provider keys server-side.
 
 Director UX:
+- The unified `•••` tools sheet keeps World & scenes, Performance, Review, Finish film, Production status and Advanced reachable while the main Director remains prompt-first.
+- World/Scene context and production recovery are secondary workspaces, not permanent panels; they remain one interaction away and reuse the existing APIs and controls.
 - Main Director is intentionally organized into four stages: Direct, Perform, Review, Finish.
 - Direct contains prompt/shot creation plus compact World/Scene Memory summaries.
 - Perform contains compact Cast + Voices plus the same shot cards so Dialogue / Precision passes remain contextual.
