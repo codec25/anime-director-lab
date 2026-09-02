@@ -10,6 +10,6 @@ function sheet(cfg,panel,body){
  const b=document.createElement('button');b.type='button';b.className='shot-action memory-sheet-trigger';b.textContent=cfg.label;b.setAttribute('aria-haspopup','dialog');b.onclick=()=>d.showModal();panel.append(b)
 }
 function apply(){for(const cfg of configs){const panel=document.getElementById(cfg.panel);if(!panel||panel.dataset.memorySheet==='1')continue;const details=panel.querySelector('.memory-disclosure'),body=details?.querySelector('.memory-disclosure-body');if(!details||!body)continue;sheet(cfg,panel,body);details.remove();panel.dataset.memorySheet='1'}}
-function boot(){apply();let timer=0;const root=document.querySelector('main')||document.body;new MutationObserver(()=>{clearTimeout(timer);timer=setTimeout(apply,70)}).observe(root,{childList:true,subtree:true})}
+function boot(){apply();document.addEventListener('ad:ui-updated',apply)}
 document.addEventListener('DOMContentLoaded',boot);
 })();
