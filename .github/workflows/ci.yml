@@ -39,3 +39,23 @@ jobs:
             echo "node --check $file"
             node --check "$file"
           done < <(find . -type f -name '*.js' -not -path './vendor/*' -not -path './node_modules/*' -print0)
+
+      - name: Mock Director integration smoke test
+        shell: bash
+        env:
+          ANIME_DIRECTOR_MOCK_MODE: '1'
+        run: |
+          set -euo pipefail
+          php -S 127.0.0.1:8123 >/tmp/anime-director-php.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:8123/director.php >/tmp/director.html; then break; fi
+            sleep 0.2
+          done
+          grep -q "Direct the anime" /tmp/director.html
+          curl -fsS http://127.0.0.1:8123/api.php?action=state | grep -q '"ok":true'
+          curl -fsS http://127.0.0.1:8123/timeline-api.php?action=state | grep -q '"ok":true'
+          curl -fsS http://127.0.0.1:8123/take-api.php?action=state | grep -q '"ok":true'
+          curl -fsS http://127.0.0.1:8123/continuity-review-api.php?action=state | grep -q '"ok":true'
+          curl -fsS -X POST http://127.0.0.1:8123/sound-repair-api.php?action=sync | grep -q '"ok":true'
