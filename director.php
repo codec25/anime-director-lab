@@ -24,7 +24,7 @@
 <link rel="stylesheet" href="assets/css/sound-design.css?v=001">
 <link rel="stylesheet" href="assets/css/timeline.css?v=001">
 <link rel="stylesheet" href="assets/css/production-stages.css?v=004">
-<link rel="stylesheet" href="assets/css/apple-ready.css?v=001">
+<link rel="stylesheet" href="assets/css/apple-ready.css?v=002">
 <link rel="stylesheet" href="assets/css/context-actions.css?v=001">
 <link rel="stylesheet" href="assets/css/progressive-disclosure.css?v=001">
 <link rel="stylesheet" href="assets/css/memory-disclosure.css?v=001">
