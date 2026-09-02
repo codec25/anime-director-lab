@@ -5,7 +5,8 @@ function focusPrompt(seed=''){
  const input=$('#directorPrompt'); if(!input)return;
  if(seed) input.value=seed;
  input.placeholder='What happens next? Direct the action, camera, emotion, dialogue or mood…';
- input.focus({preventScroll:false}); input.dispatchEvent(new Event('input',{bubbles:true}));
+ input.focus({preventScroll:false});
+ input.dispatchEvent(new Event('input',{bubbles:true}));
  input.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});
 }
 function workspace(stage){document.dispatchEvent(new CustomEvent('ad:open-workspace',{detail:{stage}}))}
@@ -20,7 +21,7 @@ function patch(){
  const bar=document.createElement('div'); bar.className='director-next-actions';
  bar.innerHTML=`<div class="director-next-copy"><span>${takeReady?'CURRENT SHOT · APPROVED TAKE':'CURRENT SHOT'}</span><strong>${takeReady?'What happens next?':'Make this shot.'}</strong></div><div class="director-next-buttons">${takeReady?'<button type="button" data-focus-continue>Continue</button><button type="button" data-focus-camera>Camera</button><button type="button" data-focus-performance>Performance</button><button type="button" data-focus-dialogue>Dialogue</button>':''}<button type="button" data-focus-more aria-label="More shot controls">•••</button></div>`;
  main.append(bar);
- bar.querySelector('[data-focus-continue]')?.addEventListener('click',()=>{const b=card.querySelector('[data-continue-shot]');b?b.click():focusPrompt('Continue naturally from this moment. ')});
+ bar.querySelector('[data-focus-continue]')?.addEventListener('click',()=>focusPrompt('Continue naturally from this moment. '));
  bar.querySelector('[data-focus-camera]')?.addEventListener('click',()=>focusPrompt('Keep everything consistent. Change the camera to '));
  bar.querySelector('[data-focus-performance]')?.addEventListener('click',()=>{workspace('perform');setTimeout(()=>card.querySelector('[data-acttwo-shot]')?.click(),180)});
  bar.querySelector('[data-focus-dialogue]')?.addEventListener('click',()=>{workspace('perform');setTimeout(()=>card.querySelector('[data-dialogue-shot]')?.click(),180)});
