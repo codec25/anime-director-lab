@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 const $=(s,r=document)=>r.querySelector(s);
-let result={issues:[],stages:{}},timer=0;
+let result={issues:[],stages:{}},timer=0,lastRefresh=0;
 async function get(url){const r=await fetch(url),d=await r.json().catch(()=>null);if(!r.ok||!d)throw new Error('Readiness check unavailable.');return d}
 function takeUrl(t){return t?.local?.url||t?.result_media?.local?.url||t?.remote_url||t?.result_media?.remote_url||''}
 function usableTakes(state,shotId){return(state?.takes||[]).filter(t=>t.shot_id===shotId&&takeUrl(t))}
@@ -61,8 +61,8 @@ function renderList(){
  box.innerHTML=items.length?items.map((x,i)=>`<button class="readiness-item" type="button" data-readiness-index="${i}"><span class="readiness-item-mark"></span><span><strong>${escapeHtml(x.title)}</strong><small>${escapeHtml(x.detail)}</small></span><b>Open</b></button>`).join(''):'<div class="readiness-ready"><span>✓</span><strong>Your film is ready for a final review.</strong><p>Confirm the approved takes in Finish, then export.</p></div>'
 }
 function escapeHtml(s){return String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
-async function refresh(){try{const [base,continuity,sound,timeline]=await Promise.all([get('api.php?action=state'),get('continuity-review-api.php?action=state').catch(()=>({scenes:[]})),get('sound-design-api.php?action=state').catch(()=>({scenes:[]})),get('timeline-api.php?action=state').catch(()=>({ffmpeg_available:null}))]);result=build(base,continuity,sound,timeline);paint()}catch(e){if(ensure())$('#readinessLabel').textContent='Readiness unavailable'}}
-async function openSheet(){await refresh();renderList();$('#readinessDialog')?.showModal()}
+async function refresh(force=false){const now=Date.now();if(!force&&now-lastRefresh<800)return;lastRefresh=now;try{const [base,continuity,sound,timeline]=await Promise.all([get('api.php?action=state'),get('continuity-review-api.php?action=state').catch(()=>({scenes:[]})),get('sound-design-api.php?action=state').catch(()=>({scenes:[]})),get('timeline-api.php?action=state').catch(()=>({ffmpeg_available:null}))]);result=build(base,continuity,sound,timeline);paint()}catch(e){if(ensure())$('#readinessLabel').textContent='Readiness unavailable'}}
+async function openSheet(){await refresh(true);renderList();$('#readinessDialog')?.showModal()}
 function route(e){const b=e.target.closest('[data-readiness-index]');if(!b)return;const x=result.issues[Number(b.dataset.readinessIndex)];if(!x)return;$('#readinessDialog')?.close();document.querySelector(`#productionStageNav [data-stage="${x.stage}"]`)?.click();setTimeout(()=>{let target=x.selector?$(x.selector):null;if(target?.matches?.('[data-open-shot]'))target=target.closest('.shot-card');target?.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});if(x.action==='dialogue')target?.querySelector('[data-dialogue-shot]')?.click();if(x.action==='acting')target?.querySelector('[data-acttwo-shot]')?.click();if(x.action==='compare')target?.querySelector('[data-compare-takes]')?.click()},180)}
 function schedule(){clearTimeout(timer);timer=setTimeout(refresh,160)}
 function boot(){ensure();refresh();document.addEventListener('ad:state-changed',schedule);document.addEventListener('ad:take-selected',schedule);document.addEventListener('click',e=>{if(e.target.closest('[data-stage]'))schedule()},true);document.addEventListener('ad:ui-updated',()=>{if(!$('#productionReadiness'))ensure()})}
