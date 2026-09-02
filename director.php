@@ -3,10 +3,18 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#08080b">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
+<meta name="theme-color" content="#0d0d12">
+<meta name="color-scheme" content="dark">
+<meta name="format-detection" content="telephone=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Anime Director">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="Anime Director">
 <title>Anime Director</title>
-<link rel="stylesheet" href="assets/css/director.css?v=002">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="assets/css/director.css?v=003">
 <link rel="stylesheet" href="assets/css/world-memory.css?v=001">
 <link rel="stylesheet" href="assets/css/semantic-references.css?v=001">
 <link rel="stylesheet" href="assets/css/scene-memory.css?v=001">
@@ -15,7 +23,8 @@
 <link rel="stylesheet" href="assets/css/continuity-review.css?v=001">
 <link rel="stylesheet" href="assets/css/sound-design.css?v=001">
 <link rel="stylesheet" href="assets/css/timeline.css?v=001">
-<link rel="stylesheet" href="assets/css/production-stages.css?v=001">
+<link rel="stylesheet" href="assets/css/production-stages.css?v=002">
+<link rel="stylesheet" href="assets/css/apple-ready.css?v=001">
 </head>
 <body>
 <div class="director-shell">
@@ -37,7 +46,7 @@
           <div class="character-context"><span class="character-dot" id="directorCharacterAvatar"></span><span class="status-dot" id="directorStatusDot"></span><span id="directorCharacterName">Loading character…</span></div>
           <span class="character-context" id="directorSceneCount">0 shots</span>
         </div>
-        <textarea class="director-input" id="directorPrompt" rows="3" placeholder="Describe the anime scene, feeling, dialogue, or change you want…" aria-label="Direct your next scene"></textarea>
+        <textarea class="director-input" id="directorPrompt" rows="3" placeholder="Describe the anime scene, feeling, dialogue, or change you want…" aria-label="Direct your next scene" enterkeyhint="send" autocapitalize="sentences" autocomplete="off" spellcheck="true"></textarea>
         <div class="compose-actions">
           <div class="compose-left"><button class="mode-btn" id="directorMode" type="button">Guide me ▾</button></div>
           <div class="compose-right"><button class="send-btn" id="directorSend" type="button" aria-label="Send direction">↑</button></div>
@@ -71,5 +80,6 @@
 <script src="assets/js/sound-design.js?v=001"></script>
 <script src="assets/js/timeline.js?v=001"></script>
 <script src="assets/js/production-stages.js?v=001"></script>
+<script src="assets/js/apple-ready.js?v=001"></script>
 </body>
 </html>
