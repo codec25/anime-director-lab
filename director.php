@@ -14,7 +14,7 @@
 <meta name="application-name" content="Anime Director">
 <title>Anime Director</title>
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="assets/css/director.css?v=003">
+<link rel="stylesheet" href="assets/css/director.css?v=004">
 <link rel="stylesheet" href="assets/css/world-memory.css?v=001">
 <link rel="stylesheet" href="assets/css/semantic-references.css?v=001">
 <link rel="stylesheet" href="assets/css/scene-memory.css?v=001">
@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="assets/css/continuity-review.css?v=001">
 <link rel="stylesheet" href="assets/css/sound-design.css?v=001">
 <link rel="stylesheet" href="assets/css/timeline.css?v=001">
-<link rel="stylesheet" href="assets/css/production-stages.css?v=002">
+<link rel="stylesheet" href="assets/css/production-stages.css?v=003">
 <link rel="stylesheet" href="assets/css/apple-ready.css?v=001">
 <link rel="stylesheet" href="assets/css/context-actions.css?v=001">
 <link rel="stylesheet" href="assets/css/progressive-disclosure.css?v=001">
@@ -38,9 +38,9 @@
 
   <main>
     <section class="hero">
-      <span class="eyebrow">✦ Director Mode</span>
+      <span class="eyebrow">✦ Director</span>
       <h1><span>Direct the anime</span><br>in your head.</h1>
-      <p>Build the film in four focused stages: direct the shots, perform the characters, review picture and sound, then finish the timeline.</p>
+      <p>Describe what should happen. Build the scene shot by shot, direct the performance, review it, then export your film.</p>
     </section>
 
     <section class="director-card" id="directorComposeStage" aria-label="Director prompt">
@@ -49,7 +49,7 @@
           <div class="character-context"><span class="character-dot" id="directorCharacterAvatar"></span><span class="status-dot" id="directorStatusDot"></span><span id="directorCharacterName">Loading character…</span></div>
           <span class="character-context" id="directorSceneCount">0 shots</span>
         </div>
-        <textarea class="director-input" id="directorPrompt" rows="3" placeholder="Describe the anime scene, feeling, dialogue, or change you want…" aria-label="Direct your next scene" enterkeyhint="send" autocapitalize="sentences" autocomplete="off" spellcheck="true"></textarea>
+        <textarea class="director-input" id="directorPrompt" rows="3" placeholder="What happens next? Describe the action, camera, mood, dialogue, or change…" aria-label="Direct your next scene" enterkeyhint="send" autocapitalize="sentences" autocomplete="off" spellcheck="true"></textarea>
         <div class="compose-actions">
           <div class="compose-left"><button class="mode-btn" id="directorMode" type="button">Guide me ▾</button></div>
           <div class="compose-right"><button class="send-btn" id="directorSend" type="button" aria-label="Send direction">↑</button></div>
@@ -61,8 +61,8 @@
     <section class="conversation" id="conversation" aria-live="polite"></section>
 
     <section id="productionStageShots">
-      <div class="section-head"><div><h2>Your production</h2><p>Keep the next filmmaking action visible. Right-click a shot on desktop, or long-press / use ••• on touch, for everything secondary.</p></div><a class="text-link" href="lab.php#scene">Advanced →</a></div>
-      <div class="scene-list" id="directorScenes"><div class="empty">Loading production…</div></div>
+      <div class="section-head"><div><h2>Your shots</h2><p>Generate the next take. Use ••• for references, revisions, dialogue, performance and other optional controls.</p></div><a class="text-link" href="lab.php#scene">Advanced →</a></div>
+      <div class="scene-list" id="directorScenes"><div class="empty">Loading your shots…</div></div>
     </section>
   </main>
 </div>
@@ -82,7 +82,7 @@
 <script src="assets/js/continuity-review.js?v=001"></script>
 <script src="assets/js/sound-design.js?v=001"></script>
 <script src="assets/js/timeline.js?v=002"></script>
-<script src="assets/js/production-stages.js?v=001"></script>
+<script src="assets/js/production-stages.js?v=002"></script>
 <script src="assets/js/apple-ready.js?v=001"></script>
 <script src="assets/js/context-actions.js?v=001"></script>
 <script src="assets/js/progressive-disclosure.js?v=001"></script>
