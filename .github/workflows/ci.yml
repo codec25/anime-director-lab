@@ -53,7 +53,8 @@ jobs:
             if curl -fsS http://127.0.0.1:8123/director.php >/tmp/director.html; then break; fi
             sleep 0.2
           done
-          grep -q "Direct the anime" /tmp/director.html
+          grep -q "What do you want" /tmp/director.html
+          grep -q "director-focus.js" /tmp/director.html
           curl -fsS http://127.0.0.1:8123/api.php?action=state | grep -q '"ok":true'
           curl -fsS http://127.0.0.1:8123/timeline-api.php?action=state | grep -q '"ok":true'
           curl -fsS http://127.0.0.1:8123/take-api.php?action=state | grep -q '"ok":true'
