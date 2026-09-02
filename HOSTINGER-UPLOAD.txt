@@ -2,6 +2,7 @@ Anime Director — current branch upload map
 
 Canonical creator product:
 - act-two-api.php
+- act-two-source-api.php
 - continue-api.php
 - continuity-review-api.php
 - dialogue-api.php
@@ -22,16 +23,23 @@ Canonical creator product:
 
 Frontend:
 - assets/css/act-two.css
+- assets/css/advanced-product.css
 - assets/css/apple-ready.css
 - assets/css/context-actions.css
 - assets/css/continuity-review.css
 - assets/css/dialogue.css
+- assets/css/director-focus.css
 - assets/css/director.css
+- assets/css/first-film-flow.css
+- assets/css/first-run-character.css
+- assets/css/conversational-edit.css
+- assets/css/generation-experience.css
 - assets/css/memory-disclosure.css
 - assets/css/memory-sheets.css
 - assets/css/production-readiness.css
 - assets/css/production-stages.css
 - assets/css/progressive-disclosure.css
+- assets/css/recovery-experience.css
 - assets/css/review-workspace.css
 - assets/css/scene-memory.css
 - assets/css/semantic-references.css
@@ -45,11 +53,17 @@ Frontend:
 - assets/js/continuity-review.js
 - assets/js/dialogue.js
 - assets/js/director.js
+- assets/js/director-focus.js
+- assets/js/first-film-flow.js
+- assets/js/first-run-character.js
+- assets/js/conversational-edit.js
+- assets/js/generation-experience.js
 - assets/js/memory-disclosure.js
 - assets/js/memory-sheets.js
 - assets/js/production-readiness.js
 - assets/js/production-stages.js
 - assets/js/progressive-disclosure.js
+- assets/js/recovery-experience.js
 - assets/js/review-workspace.js
 - assets/js/scene-memory.js
 - assets/js/semantic-references.js
@@ -112,6 +126,8 @@ Director UX:
 - Dialogue voice, Precision Acting, scene sound and final export failures use explicit recoverable states; retries preserve approved takes, timing and sound plans.
 - Production Readiness routes failed dialogue voices, performance passes and sound jobs back to their existing contextual controls without adding permanent panels.
 - No backend feature is removed by progressive disclosure; existing DOM controls and event handlers are moved into focused sheets so behavior stays intact.
+- World, Scene, Cast, continuity correction and sound-cue editing expand inside their current unified workspace instead of opening modal layers on top of modal layers.
+- Single-character Act-Two can use the approved take as its scene-preserving character video; choosing a custom character video clears that source mode so the UI and provider input remain truthful.
 
 Apple / iPhone readiness:
 - `viewport-fit=cover` plus safe-area padding are used for notched iPhones and standalone mode.
