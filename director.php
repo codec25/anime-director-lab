@@ -61,7 +61,7 @@
     <section class="conversation" id="conversation" aria-live="polite"></section>
 
     <section id="productionStageShots">
-      <div class="section-head"><div><h2>Your shots</h2><p>Generate the next take. Use ••• for references, revisions, dialogue, performance and other optional controls.</p></div><a class="text-link" href="lab.php#scene">Advanced →</a></div>
+      <div class="section-head"><div><h2>Your shots</h2><p>Generate a take, then continue the story. Optional controls remain under •••.</p></div></div>
       <div class="scene-list" id="directorScenes"><div class="empty">Loading your shots…</div></div>
     </section>
   </main>
