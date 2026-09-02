@@ -40,7 +40,11 @@ jobs:
             node --check "$file"
           done < <(find . -type f -name '*.js' -not -path './vendor/*' -not -path './node_modules/*' -print0)
 
-      - name: Audit active Director surface\n        shell: bash\n        run: php tests/director-surface-audit.php\n\n      - name: Mock Director integration smoke test
+      - name: Audit active Director surface
+        shell: bash
+        run: php tests/director-surface-audit.php
+
+      - name: Mock Director integration smoke test
         shell: bash
         env:
           ANIME_DIRECTOR_MOCK_MODE: '1'
