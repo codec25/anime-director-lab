@@ -27,6 +27,7 @@
 <link rel="stylesheet" href="assets/css/apple-ready.css?v=001">
 <link rel="stylesheet" href="assets/css/context-actions.css?v=001">
 <link rel="stylesheet" href="assets/css/progressive-disclosure.css?v=001">
+<link rel="stylesheet" href="assets/css/memory-disclosure.css?v=001">
 </head>
 <body>
 <div class="director-shell">
@@ -85,5 +86,6 @@
 <script src="assets/js/apple-ready.js?v=001"></script>
 <script src="assets/js/context-actions.js?v=001"></script>
 <script src="assets/js/progressive-disclosure.js?v=001"></script>
+<script src="assets/js/memory-disclosure.js?v=001"></script>
 </body>
 </html>
