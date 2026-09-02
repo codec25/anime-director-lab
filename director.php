@@ -28,6 +28,8 @@
 <link rel="stylesheet" href="assets/css/context-actions.css?v=001">
 <link rel="stylesheet" href="assets/css/progressive-disclosure.css?v=001">
 <link rel="stylesheet" href="assets/css/memory-disclosure.css?v=001">
+<link rel="stylesheet" href="assets/css/memory-sheets.css?v=001">
+<link rel="stylesheet" href="assets/css/production-readiness.css?v=001">
 <link rel="stylesheet" href="assets/css/review-workspace.css?v=001">
 <link rel="stylesheet" href="assets/css/take-compare.css?v=001">
 </head>
@@ -70,7 +72,7 @@
 </div>
 <script>window.AD_CONFIG={mock:<?= ad_mock_mode() ? 'true' : 'false' ?>};</script>
 <script src="assets/js/scene-memory.js?v=001"></script>
-<script src="assets/js/director.js?v=005"></script>
+<script src="assets/js/director.js?v=006"></script>
 <script src="assets/js/world-memory.js?v=001"></script>
 <script src="assets/js/semantic-references.js?v=001"></script>
 <script src="assets/js/dialogue.js?v=002"></script>
@@ -85,5 +87,7 @@
 <script src="assets/js/take-compare.js?v=001"></script>
 <script src="assets/js/progressive-disclosure.js?v=001"></script>
 <script src="assets/js/memory-disclosure.js?v=001"></script>
+<script src="assets/js/memory-sheets.js?v=001"></script>
+<script src="assets/js/production-readiness.js?v=001"></script>
 </body>
 </html>
