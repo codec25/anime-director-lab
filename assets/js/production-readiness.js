@@ -20,6 +20,8 @@ function build(base,continuity,sound,timeline){
    if(!source||!selectedTake(state,source))issues.push(issue(`continuity-${shot.id}`,'direct','Continuation needs its source','Generate and approve the previous shot before continuing this one.',selector));
   }
   const lines=Array.isArray(shot.dialogue)?shot.dialogue:[],needed=dialogueSeconds(lines),target=Number(shot.duration_target||5);
+  const failedVoice=lines.find(l=>l.speech_status==='failed');
+  if(failedVoice)issues.push(issue(`voice-${shot.id}`,'perform','Retry dialogue voice',failedVoice.speech_error||'A dialogue voice failed and can be retried.',selector,'dialogue'));
   if(needed>target+1)issues.push(issue(`dialogue-${shot.id}`,'perform','Check dialogue timing',`The dialogue may need about ${needed.toFixed(1)}s, while the shot targets ${target.toFixed(1)}s.`,selector,'dialogue'));
   const passes=shot.act_two_orchestration?.passes||[];
   if(passes.some(p=>p.status==='failed'))issues.push(issue(`acting-${shot.id}`,'perform','Retry precision acting','A precision-performance pass failed and can be retried.',selector,'acting'));
