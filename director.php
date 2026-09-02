@@ -81,7 +81,7 @@
 <script src="assets/js/act-two.js?v=001"></script>
 <script src="assets/js/continuity-review.js?v=001"></script>
 <script src="assets/js/sound-design.js?v=001"></script>
-<script src="assets/js/timeline.js?v=001"></script>
+<script src="assets/js/timeline.js?v=002"></script>
 <script src="assets/js/production-stages.js?v=001"></script>
 <script src="assets/js/apple-ready.js?v=001"></script>
 <script src="assets/js/context-actions.js?v=001"></script>
