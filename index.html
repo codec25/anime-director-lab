@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0d0d12">
+<title>Anime Director — Mobile Preview</title>
+<link rel="stylesheet" href="assets/css/director.css?v=003">
+<link rel="stylesheet" href="assets/css/production-stages.css?v=002">
+<link rel="stylesheet" href="assets/css/apple-ready.css?v=001">
+<style>
+.preview-note{max-width:760px;margin:12px auto;padding:10px 14px;border:1px solid var(--line,#343440);border-radius:14px;background:rgba(255,255,255,.04);font-size:13px;color:var(--muted,#b8b8c3)}
+.preview-stage{max-width:760px;margin:14px auto}.preview-shot{border:1px solid var(--line,#343440);border-radius:20px;background:var(--panel,#17171e);padding:14px;margin-top:12px}.preview-frame{aspect-ratio:16/9;border-radius:14px;background:linear-gradient(145deg,#242431,#121218);display:grid;place-items:center;color:#aaa}.preview-actions{display:flex;justify-content:space-between;align-items:center;margin-top:12px}.preview-primary{min-height:44px;border:0;border-radius:14px;padding:0 18px;font-weight:800}.preview-more{width:44px;height:44px;border-radius:50%;border:1px solid var(--line,#343440);background:transparent;color:inherit}.preview-menu{display:none;margin-top:8px;border:1px solid var(--line,#343440);border-radius:14px;overflow:hidden}.preview-menu.open{display:block}.preview-menu button{display:block;width:100%;min-height:44px;text-align:left;padding:0 14px;border:0;border-bottom:1px solid var(--line,#343440);background:var(--panel2,#20202a);color:inherit}.preview-menu button:last-child{border-bottom:0}
+</style>
+</head>
+<body>
+<div class="director-shell">
+<header class="director-topbar"><div class="brand"><span class="brand-mark">AD</span><span>Anime Director</span></div><div class="top-actions"><button class="icon-btn">＋ New</button></div></header>
+<main>
+<section class="hero"><span class="eyebrow">✦ Director Mode</span><h1><span>Direct the anime</span><br>in your head.</h1><p>Direct the shots, perform the characters, review picture and sound, then finish the timeline.</p></section>
+<div class="preview-note">Mobile UI preview. Generation and PHP-backed production tools are intentionally disabled on GitHub Pages.</div>
+<section class="director-card"><div class="director-inner"><div class="context-row"><div class="character-context"><span class="character-dot"></span><span>Akio · Scene 1</span></div><span class="character-context">3 shots</span></div><textarea class="director-input" rows="3" placeholder="Make him walk slowly toward the ball…"></textarea><div class="compose-actions"><button class="mode-btn">Guide me ▾</button><button class="send-btn">↑</button></div></div></section>
+<div class="quick-row"><button class="chip">Cinematic anime</button><button class="chip">Close-up on eyes</button><button class="chip">Night + rain</button></div>
+<section class="preview-stage"><div class="section-head"><div><h2>Your production</h2><p>Only the next filmmaking action stays visible.</p></div></div>
+<article class="preview-shot"><div class="preview-frame">SHOT 03 · Anime frame preview</div><div class="shot-tags"><span class="shot-tag">Scene 1</span><span class="shot-tag">4 sec</span><span class="shot-tag">Dialogue ready</span></div><h3>Reveal the creature</h3><p>Cut behind Akio. Keep his clothes and lighting consistent while the creature enters frame.</p><div class="preview-actions"><button class="preview-primary">Generate shot</button><button class="preview-more" aria-label="More shot actions">•••</button></div><div class="preview-menu"><button>Reference</button><button>Revise shot</button><button>Continue story</button><button>Dialogue</button><button>Precision acting</button><button>Advanced</button></div></article>
+</section>
+</main></div>
+<nav class="bottom-nav"><a><span class="nav-icon">⌂</span><span>Home</span></a><a><span class="nav-icon">◎</span><span>Characters</span></a><a class="active"><span class="bottom-create">✦</span><span style="margin-top:25px">Direct</span></a><a><span class="nav-icon">▦</span><span>Advanced</span></a></nav>
+<script>document.querySelector('.preview-more').onclick=()=>document.querySelector('.preview-menu').classList.toggle('open');</script>
+</body></html>
