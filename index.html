@@ -2,29 +2,60 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
 <meta name="theme-color" content="#0d0d12">
-<title>Anime Director — Mobile Preview</title>
+<meta name="color-scheme" content="dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Anime Director">
+<title>Anime Director</title>
 <link rel="stylesheet" href="assets/css/director.css?v=003">
+<link rel="stylesheet" href="assets/css/world-memory.css?v=001">
+<link rel="stylesheet" href="assets/css/semantic-references.css?v=001">
+<link rel="stylesheet" href="assets/css/scene-memory.css?v=001">
+<link rel="stylesheet" href="assets/css/dialogue.css?v=002">
+<link rel="stylesheet" href="assets/css/act-two.css?v=001">
+<link rel="stylesheet" href="assets/css/continuity-review.css?v=001">
+<link rel="stylesheet" href="assets/css/sound-design.css?v=001">
+<link rel="stylesheet" href="assets/css/timeline.css?v=001">
 <link rel="stylesheet" href="assets/css/production-stages.css?v=002">
 <link rel="stylesheet" href="assets/css/apple-ready.css?v=001">
+<link rel="stylesheet" href="assets/css/context-actions.css?v=001">
+<link rel="stylesheet" href="assets/css/progressive-disclosure.css?v=001">
+<link rel="stylesheet" href="assets/css/memory-disclosure.css?v=001">
 <style>
-.preview-note{max-width:760px;margin:12px auto;padding:10px 14px;border:1px solid var(--line,#343440);border-radius:14px;background:rgba(255,255,255,.04);font-size:13px;color:var(--muted,#b8b8c3)}
-.preview-stage{max-width:760px;margin:14px auto}.preview-shot{border:1px solid var(--line,#343440);border-radius:20px;background:var(--panel,#17171e);padding:14px;margin-top:12px}.preview-frame{aspect-ratio:16/9;border-radius:14px;background:linear-gradient(145deg,#242431,#121218);display:grid;place-items:center;color:#aaa}.preview-actions{display:flex;justify-content:space-between;align-items:center;margin-top:12px}.preview-primary{min-height:44px;border:0;border-radius:14px;padding:0 18px;font-weight:800}.preview-more{width:44px;height:44px;border-radius:50%;border:1px solid var(--line,#343440);background:transparent;color:inherit}.preview-menu{display:none;margin-top:8px;border:1px solid var(--line,#343440);border-radius:14px;overflow:hidden}.preview-menu.open{display:block}.preview-menu button{display:block;width:100%;min-height:44px;text-align:left;padding:0 14px;border:0;border-bottom:1px solid var(--line,#343440);background:var(--panel2,#20202a);color:inherit}.preview-menu button:last-child{border-bottom:0}
+.preview-only{max-width:760px;margin:10px auto 0;padding:8px 12px;border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:12px;background:rgba(255,255,255,.035)}
+.stage-tabs{display:flex;gap:8px;position:sticky;top:calc(58px + env(safe-area-inset-top));z-index:8;max-width:760px;margin:12px auto;padding:8px;background:rgba(13,13,18,.9);backdrop-filter:blur(18px);border:1px solid var(--line);border-radius:16px}.stage-tabs button{flex:1;min-height:44px;border:0;border-radius:12px;background:transparent;color:var(--muted);font-weight:700}.stage-tabs button.active{background:var(--panel2);color:var(--text)}
+.stage-panel{display:none}.stage-panel.active{display:block}.mini-panel{max-width:760px;margin:14px auto;padding:16px;border:1px solid var(--line);background:var(--panel);border-radius:20px}.mini-panel h2{margin:0 0 6px}.mini-panel p{margin:0;color:var(--muted)}.mini-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.mini-chip{padding:9px 11px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);font-size:12px}.shot-menu{display:none;margin-top:8px;border:1px solid var(--line);border-radius:14px;overflow:hidden}.shot-menu.open{display:block}.shot-menu button{display:block;width:100%;min-height:44px;text-align:left;padding:0 14px;border:0;border-bottom:1px solid var(--line);background:var(--panel2);color:var(--text)}.shot-menu button:last-child{border-bottom:0}.more-btn{min-width:44px;min-height:44px;border-radius:12px;border:1px solid var(--line);background:var(--panel2);color:var(--text)}
 </style>
 </head>
 <body>
 <div class="director-shell">
-<header class="director-topbar"><div class="brand"><span class="brand-mark">AD</span><span>Anime Director</span></div><div class="top-actions"><button class="icon-btn">＋ New</button></div></header>
+<header class="director-topbar">
+<div class="brand"><span class="brand-mark">AD</span><span>Anime Director</span></div>
+<div class="top-actions"><button class="icon-btn" type="button">＋ New</button></div>
+</header>
 <main>
-<section class="hero"><span class="eyebrow">✦ Director Mode</span><h1><span>Direct the anime</span><br>in your head.</h1><p>Direct the shots, perform the characters, review picture and sound, then finish the timeline.</p></section>
-<div class="preview-note">Mobile UI preview. Generation and PHP-backed production tools are intentionally disabled on GitHub Pages.</div>
-<section class="director-card"><div class="director-inner"><div class="context-row"><div class="character-context"><span class="character-dot"></span><span>Akio · Scene 1</span></div><span class="character-context">3 shots</span></div><textarea class="director-input" rows="3" placeholder="Make him walk slowly toward the ball…"></textarea><div class="compose-actions"><button class="mode-btn">Guide me ▾</button><button class="send-btn">↑</button></div></div></section>
-<div class="quick-row"><button class="chip">Cinematic anime</button><button class="chip">Close-up on eyes</button><button class="chip">Night + rain</button></div>
-<section class="preview-stage"><div class="section-head"><div><h2>Your production</h2><p>Only the next filmmaking action stays visible.</p></div></div>
-<article class="preview-shot"><div class="preview-frame">SHOT 03 · Anime frame preview</div><div class="shot-tags"><span class="shot-tag">Scene 1</span><span class="shot-tag">4 sec</span><span class="shot-tag">Dialogue ready</span></div><h3>Reveal the creature</h3><p>Cut behind Akio. Keep his clothes and lighting consistent while the creature enters frame.</p><div class="preview-actions"><button class="preview-primary">Generate shot</button><button class="preview-more" aria-label="More shot actions">•••</button></div><div class="preview-menu"><button>Reference</button><button>Revise shot</button><button>Continue story</button><button>Dialogue</button><button>Precision acting</button><button>Advanced</button></div></article>
-</section>
+<section class="hero"><span class="eyebrow">✦ Director Mode</span><h1><span>Direct the anime</span><br>in your head.</h1><p>Build the film in four focused stages: direct the shots, perform the characters, review picture and sound, then finish the timeline.</p></section>
+<div class="preview-only">GitHub Pages version of the current Director interface. AI generation is disabled here because GitHub Pages cannot run the PHP backend.</div>
+<nav class="stage-tabs" aria-label="Production stage">
+<button class="active" data-stage="direct">Direct</button><button data-stage="perform">Perform</button><button data-stage="review">Review</button><button data-stage="finish">Finish</button>
+</nav>
+<div class="stage-panel active" data-panel="direct">
+<section class="director-card" id="directorComposeStage" aria-label="Director prompt"><div class="director-inner"><div class="context-row"><div class="character-context"><span class="character-dot"></span><span class="status-dot ready"></span><span>Akio v1 · Character locked</span></div><span class="character-context">3 shots</span></div><textarea class="director-input" rows="3" placeholder="Describe the anime scene, feeling, dialogue, or change you want…"></textarea><div class="compose-actions"><div class="compose-left"><button class="mode-btn">Guide me ▾</button></div><div class="compose-right"><button class="send-btn">↑</button></div></div></div></section>
+<div class="quick-row"><button class="chip">Create a tense anime opening in the rain</button><button class="chip">Close-up on the eyes</button><button class="chip">Keep the character, change the mood</button></div>
+<section class="mini-panel"><span class="world-kicker">WORLD MEMORY</span><h2>Keep the world consistent.</h2><p>Tokyo alley · Late night · Light rain · Blue-magenta neon</p><div class="mini-row"><span class="mini-chip">Indigo + cyan palette</span><span class="mini-chip">Wet pavement</span><span class="mini-chip">Same wardrobe</span></div></section>
+<section class="mini-panel"><span class="world-kicker">SCENE MEMORY</span><h2>Scene 1 · Alley reveal</h2><p>Low-angle suspense, rainy neon environment, consistent screen direction.</p></section>
+<section id="productionStageShots"><div class="section-head"><div><h2>Your production</h2><p>Keep the next filmmaking action visible. Use ••• for everything secondary.</p></div></div><div class="scene-list">
+<article class="shot-card"><div class="shot-main"><div class="shot-thumb">✦</div><div class="shot-copy"><div class="shot-number">SHOT 03</div><strong>Reveal the creature</strong><p>Cut behind Akio and reveal the creature. Keep his clothing, rain, and neon lighting consistent.</p><div class="shot-tags"><span class="shot-tag">anime</span><span class="shot-tag">1280:720</span><span class="shot-tag">draft</span></div></div><div class="shot-actions"><button class="shot-action primary-action">Generate anime take</button><button class="more-btn" aria-label="More actions">•••</button></div></div><div class="shot-menu"><button>＋ Reference</button><button>Revise</button><button>Continue story</button><button>Dialogue</button><button>Precision acting</button><button>Advanced shot tools</button></div></article>
+<article class="shot-card"><div class="shot-main"><div class="shot-thumb">✦</div><div class="shot-copy"><div class="shot-number">SHOT 02</div><strong>Ground-level follow</strong><p>Camera drops to ground level and follows his feet through the wet alley.</p><div class="shot-tags"><span class="shot-tag">cinematic</span><span class="shot-tag">1280:720</span><span class="shot-tag">approved</span></div></div><div class="shot-actions"><button class="shot-action primary-action">Continue from video</button><button class="more-btn">•••</button></div></div><div class="shot-menu"><button>Revise</button><button>Continue story</button><button>Dialogue</button><button>Advanced shot tools</button></div></article>
+</div></section></div>
+<div class="stage-panel" data-panel="perform"><section class="mini-panel"><span class="world-kicker">CAST + VOICES</span><h2>Direct the performance.</h2><p>Akio · Lead character · Voice ready</p><div class="mini-row"><span class="mini-chip">Dialogue</span><span class="mini-chip">Voice memory</span><span class="mini-chip">Precision acting</span></div></section><section class="mini-panel"><h2>Shot 03 performance</h2><p>“What was that?” · nervous delivery · subtle breath before the line.</p><div class="mini-row"><button class="shot-action primary-action">Generate voice</button><button class="shot-action">Precision acting</button></div></section></div>
+<div class="stage-panel" data-panel="review"><section class="mini-panel"><span class="world-kicker">CONTINUITY REVIEW</span><h2>Picture continuity</h2><p>Identity, wardrobe, location, lighting, palette and screen direction are consistent across the current sequence.</p><div class="mini-row"><span class="mini-chip">Identity ✓</span><span class="mini-chip">Wardrobe ✓</span><span class="mini-chip">Lighting ✓</span></div></section><section class="mini-panel"><span class="world-kicker">SOUND DESIGN</span><h2>Strategic sound</h2><p>Rain ambience · distant traffic · footsteps · creature reveal impact.</p></section></div>
+<div class="stage-panel" data-panel="finish"><section class="mini-panel"><span class="world-kicker">DIRECTOR TIMELINE</span><h2>Finish the sequence.</h2><p>3 clips · dialogue · ambience · SFX · music</p><div class="mini-row"><span class="mini-chip">Shot 01 · 5s</span><span class="mini-chip">Shot 02 · 4s</span><span class="mini-chip">Shot 03 · 6s</span></div><div class="mini-row"><button class="shot-action primary-action">Render final film</button><button class="shot-action">Export plan</button></div></section></div>
 </main></div>
-<nav class="bottom-nav"><a><span class="nav-icon">⌂</span><span>Home</span></a><a><span class="nav-icon">◎</span><span>Characters</span></a><a class="active"><span class="bottom-create">✦</span><span style="margin-top:25px">Direct</span></a><a><span class="nav-icon">▦</span><span>Advanced</span></a></nav>
-<script>document.querySelector('.preview-more').onclick=()=>document.querySelector('.preview-menu').classList.toggle('open');</script>
+<nav class="bottom-nav" aria-label="Primary navigation"><a><span class="nav-icon">⌂</span><span>Home</span></a><a><span class="nav-icon">◎</span><span>Characters</span></a><a class="active"><span class="bottom-create">✦</span><span style="margin-top:25px">Direct</span></a><a><span class="nav-icon">▦</span><span>Advanced</span></a></nav>
+<script>
+const tabs=[...document.querySelectorAll('[data-stage]')];const panels=[...document.querySelectorAll('[data-panel]')];tabs.forEach(b=>b.onclick=()=>{tabs.forEach(x=>x.classList.toggle('active',x===b));panels.forEach(p=>p.classList.toggle('active',p.dataset.panel===b.dataset.stage));window.scrollTo({top:0,behavior:'smooth'})});document.querySelectorAll('.more-btn').forEach(b=>b.onclick=()=>b.closest('.shot-card').querySelector('.shot-menu').classList.toggle('open'));document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>document.querySelector('.director-input').value=b.textContent);
+</script>
 </body></html>
