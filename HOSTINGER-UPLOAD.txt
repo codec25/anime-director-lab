@@ -28,6 +28,8 @@ Frontend:
 - assets/css/dialogue.css
 - assets/css/director.css
 - assets/css/memory-disclosure.css
+- assets/css/memory-sheets.css
+- assets/css/production-readiness.css
 - assets/css/production-stages.css
 - assets/css/progressive-disclosure.css
 - assets/css/review-workspace.css
@@ -44,6 +46,8 @@ Frontend:
 - assets/js/dialogue.js
 - assets/js/director.js
 - assets/js/memory-disclosure.js
+- assets/js/memory-sheets.js
+- assets/js/production-readiness.js
 - assets/js/production-stages.js
 - assets/js/progressive-disclosure.js
 - assets/js/review-workspace.js
@@ -95,12 +99,13 @@ Director UX:
 - Contextual actions reuse the existing real buttons/handlers instead of duplicating backend logic. Current menu actions include Compare takes, Reference, Revise, Continue story, Dialogue, Precision acting, and Advanced shot tools when those controls are available. Compare takes appears only when at least two usable takes exist.
 - Dynamic Dialogue / Act-Two controls remain discoverable because the contextual layer observes shot-card changes and reads the live buttons each time the menu opens.
 - Progressive disclosure is used across later production stages instead of exposing every editor control at once.
-- In Direct, World Memory keeps its summary visible while references/form controls sit under World options. Scene Memory keeps active-scene switching visible while presets, plates and detailed overrides sit under Scene options.
-- In Perform, the cast overview remains visible while character/voice setup forms sit under Cast setup. Dialogue stays shot-contextual through the shot menu/sheet.
+- In Direct, World and Scene summaries remain visible while their references and forms open in focused sheets. Active-scene switching stays immediate.
+- In Perform, the cast overview remains visible while character/voice setup opens in a focused sheet. Dialogue stays shot-contextual through the shot menu/sheet.
 - In Review, Scene Bed and Music remain first-class while Mix continuity notes and Shot SFX/Foley management are collapsed secondary sections.
 - In Finish, sequence order and Render remain first-class. Per-clip trim/transition controls are collapsed under Edit clip; Audio tracks and Mix & master are collapsed secondary sections.
 - Rebuild from approved takes, edit-plan download, continuity Re-direct and Precision acting are visually demoted power actions rather than competing with the stage's primary action.
-- No backend feature is removed by progressive disclosure; existing DOM controls and event handlers are moved into native details sections so behavior stays intact.
+- Production Readiness provides one compact status control, stage indicators, dialogue-duration warnings and direct routing to blocking issues.
+- No backend feature is removed by progressive disclosure; existing DOM controls and event handlers are moved into focused sheets so behavior stays intact.
 
 Apple / iPhone readiness:
 - `viewport-fit=cover` plus safe-area padding are used for notched iPhones and standalone mode.
