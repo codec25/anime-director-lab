@@ -25,6 +25,7 @@ Frontend:
 - assets/css/continuity-review.css
 - assets/css/dialogue.css
 - assets/css/director.css
+- assets/css/memory-disclosure.css
 - assets/css/production-stages.css
 - assets/css/progressive-disclosure.css
 - assets/css/scene-memory.css
@@ -38,6 +39,7 @@ Frontend:
 - assets/js/continuity-review.js
 - assets/js/dialogue.js
 - assets/js/director.js
+- assets/js/memory-disclosure.js
 - assets/js/production-stages.js
 - assets/js/progressive-disclosure.js
 - assets/js/scene-memory.js
@@ -77,8 +79,8 @@ Do not upload `.env` from Git. Keep provider keys server-side.
 
 Director UX:
 - Main Director is intentionally organized into four stages: Direct, Perform, Review, Finish.
-- Direct contains prompt/shot creation plus World/Scene Memory.
-- Perform contains Cast + Voices and the same shot cards so Dialogue / Precision passes remain contextual.
+- Direct contains prompt/shot creation plus compact World/Scene Memory summaries.
+- Perform contains compact Cast + Voices plus the same shot cards so Dialogue / Precision passes remain contextual.
 - Review contains Continuity Review + Sound Design.
 - Finish contains the Director Timeline + export.
 - The former capability showcase and decorative memory cards were removed from the main page to avoid feature stacking; underlying APIs remain intact.
@@ -87,6 +89,8 @@ Director UX:
 - Contextual actions reuse the existing real buttons/handlers instead of duplicating backend logic. Current menu actions include Reference, Revise, Continue story, Dialogue, Precision acting, and Advanced shot tools when those controls are available.
 - Dynamic Dialogue / Act-Two controls remain discoverable because the contextual layer observes shot-card changes and reads the live buttons each time the menu opens.
 - Progressive disclosure is used across later production stages instead of exposing every editor control at once.
+- In Direct, World Memory keeps its summary visible while references/form controls sit under World options. Scene Memory keeps active-scene switching visible while presets, plates and detailed overrides sit under Scene options.
+- In Perform, the cast overview remains visible while character/voice setup forms sit under Cast setup. Dialogue stays shot-contextual through the shot menu/sheet.
 - In Review, Scene Bed and Music remain first-class while Mix continuity notes and Shot SFX/Foley management are collapsed secondary sections.
 - In Finish, sequence order and Render remain first-class. Per-clip trim/transition controls are collapsed under Edit clip; Audio tracks and Mix & master are collapsed secondary sections.
 - Reset rough cut, JSON export plan, continuity Re-direct and Precision acting are visually demoted power actions rather than competing with the stage's primary action.
