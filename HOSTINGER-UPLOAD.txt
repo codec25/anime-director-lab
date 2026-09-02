@@ -21,6 +21,7 @@ Canonical creator product:
 Frontend:
 - assets/css/act-two.css
 - assets/css/apple-ready.css
+- assets/css/context-actions.css
 - assets/css/continuity-review.css
 - assets/css/dialogue.css
 - assets/css/director.css
@@ -32,6 +33,7 @@ Frontend:
 - assets/css/world-memory.css
 - assets/js/act-two.js
 - assets/js/apple-ready.js
+- assets/js/context-actions.js
 - assets/js/continuity-review.js
 - assets/js/dialogue.js
 - assets/js/director.js
@@ -78,6 +80,10 @@ Director UX:
 - Review contains Continuity Review + Sound Design.
 - Finish contains the Director Timeline + export.
 - The former capability showcase and decorative memory cards were removed from the main page to avoid feature stacking; underlying APIs remain intact.
+- Shot cards keep only the current primary generation/check action visible.
+- Secondary shot actions are contextual: desktop right-click, touch long-press, or the visible `•••` overflow button.
+- Contextual actions reuse the existing real buttons/handlers instead of duplicating backend logic. Current menu actions include Reference, Revise, Continue story, Dialogue, Precision acting, and Advanced shot tools when those controls are available.
+- Dynamic Dialogue / Act-Two controls remain discoverable because the contextual layer observes shot-card changes and reads the live buttons each time the menu opens.
 
 Apple / iPhone readiness:
 - `viewport-fit=cover` plus safe-area padding are used for notched iPhones and standalone mode.
