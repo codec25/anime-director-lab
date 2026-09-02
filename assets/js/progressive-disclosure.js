@@ -22,6 +22,6 @@ function wrapTimeline(){const panel=$('#timelinePanel');if(!panel)return;
 function polishContinuity(){const panel=$('#continuityPanel');if(!panel)return;for(const b of panel.querySelectorAll('[data-redirect-shot]'))b.classList.add('director-secondary-action')}
 function polishPerform(){for(const b of document.querySelectorAll('[data-acttwo-shot]'))b.classList.add('director-secondary-action')}
 function apply(){wrapSound();wrapTimeline();polishContinuity();polishPerform()}
-function boot(){apply();let queued=false;const root=$('main')||document.body;new MutationObserver(()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;apply()})}).observe(root,{childList:true,subtree:true})}
+function boot(){apply();document.addEventListener('ad:ui-updated',apply)}
 document.addEventListener('DOMContentLoaded',boot);
 })();
