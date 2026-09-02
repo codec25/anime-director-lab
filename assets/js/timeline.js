@@ -28,6 +28,6 @@ async function reset(){if(!confirm('Rebuild the film from the currently approved
 async function manifest(){try{await syncSound();const o=await req('timeline-api.php?action=manifest');const blob=new Blob([JSON.stringify(o.manifest,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='anime-director-timeline.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}catch(e){toast(e.message)}}
 async function renderMovie(){if(!data?.ffmpeg_available)return;if(!confirm('Export the finished film now?'))return;try{toast('Finishing your film…');await syncSound();await alignApprovedTakes();const o=await req('timeline-api.php?action=render',{method:'POST'});toast(o.note||'Final MP4 ready');if(/iPhone|iPad|iPod/i.test(navigator.userAgent))location.href=o.url;else window.open(o.url,'_blank','noopener')}catch(e){toast(e.message)}}
 async function refresh(){await syncSound();const [timeline,base]=await Promise.all([req('timeline-api.php?action=state'),req('api.php?action=state')]);data=timeline;appState=base.state||null;await alignApprovedTakes();renderAll()}
-function boot(){inject();refresh().catch(e=>toast(e.message))}
+function boot(){inject();document.addEventListener('ad:take-selected',()=>refresh().catch(e=>toast(e.message)));refresh().catch(e=>toast(e.message))}
 document.addEventListener('DOMContentLoaded',boot);
 })();
