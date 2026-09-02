@@ -74,14 +74,14 @@
 </nav>
 <script>window.AD_CONFIG={mock:<?= ad_mock_mode() ? 'true' : 'false' ?>};</script>
 <script src="assets/js/scene-memory.js?v=001"></script>
-<script src="assets/js/director.js?v=002"></script>
+<script src="assets/js/director.js?v=003"></script>
 <script src="assets/js/world-memory.js?v=001"></script>
 <script src="assets/js/semantic-references.js?v=001"></script>
 <script src="assets/js/dialogue.js?v=002"></script>
 <script src="assets/js/act-two.js?v=001"></script>
 <script src="assets/js/continuity-review.js?v=001"></script>
 <script src="assets/js/sound-design.js?v=001"></script>
-<script src="assets/js/timeline.js?v=002"></script>
+<script src="assets/js/timeline.js?v=003"></script>
 <script src="assets/js/production-stages.js?v=002"></script>
 <script src="assets/js/apple-ready.js?v=001"></script>
 <script src="assets/js/context-actions.js?v=001"></script>
