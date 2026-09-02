@@ -56,6 +56,7 @@ Frontend:
 - assets/js/sound-design.js
 - assets/js/take-compare.js
 - assets/js/timeline.js
+- assets/js/ui-observer.js
 - assets/js/world-memory.js
 
 Backend additions/changes:
@@ -105,6 +106,7 @@ Director UX:
 - In Finish, sequence order and Render remain first-class. Per-clip trim/transition controls are collapsed under Edit clip; Audio tracks and Mix & master are collapsed secondary sections.
 - Rebuild from approved takes, edit-plan download, continuity Re-direct and Precision acting are visually demoted power actions rather than competing with the stage's primary action.
 - Production Readiness provides one compact status control, stage indicators, dialogue-duration warnings and direct routing to blocking issues.
+- Dynamic UI organization uses one shared observer plus explicit shot-render events instead of multiple modules observing and rescanning the same DOM.
 - No backend feature is removed by progressive disclosure; existing DOM controls and event handlers are moved into focused sheets so behavior stays intact.
 
 Apple / iPhone readiness:
