@@ -16,6 +16,6 @@ function nav(){if($('#productionStageNav'))return;const anchor=$('#quickRow')||$
 function allSelectors(){return [...new Set(Object.values(map).flat())]}
 function setStage(next,scroll=false){if(!order.includes(next))return;stage=next;localStorage.setItem('ad_director_stage',stage);apply(scroll)}
 function apply(scroll=false){nav();document.querySelectorAll('#productionStageNav [data-stage]').forEach(b=>{const active=b.dataset.stage===stage;b.classList.toggle('active',active);b.setAttribute('aria-current',active?'step':'false')});for(const sel of allSelectors()){const el=$(sel);if(el)el.classList.toggle('stage-hidden',!(map[stage]||[]).includes(sel))}for(const sel of memory){const el=$(sel);if(el)el.classList.toggle('stage-hidden',stage!=='direct')}document.body.dataset.directorStage=stage;if(scroll){const target=stage==='finish'?$('#timelinePanel'):stage==='review'?($('#reviewWorkspaceSwitch')||$('#continuityPanel')||$('#soundDesignPanel')):stage==='perform'?($('#castMemoryPanel')||$('#productionStageShots')):$('#directorComposeStage');target?.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'})}}
-function boot(){nav();apply();const root=$('main')||document.body;let timer=0;new MutationObserver(()=>{clearTimeout(timer);timer=setTimeout(()=>apply(false),50)}).observe(root,{childList:true,subtree:true})}
+function boot(){nav();apply();document.addEventListener('ad:ui-updated',()=>apply(false))}
 document.addEventListener('DOMContentLoaded',boot);
 })();
