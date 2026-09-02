@@ -107,6 +107,8 @@ Director UX:
 - Rebuild from approved takes, edit-plan download, continuity Re-direct and Precision acting are visually demoted power actions rather than competing with the stage's primary action.
 - Production Readiness provides one compact status control, stage indicators, dialogue-duration warnings and direct routing to blocking issues.
 - Dynamic UI organization uses one shared observer plus explicit shot-render events instead of multiple modules observing and rescanning the same DOM.
+- Dialogue voice, Precision Acting, scene sound and final export failures use explicit recoverable states; retries preserve approved takes, timing and sound plans.
+- Production Readiness routes failed dialogue voices, performance passes and sound jobs back to their existing contextual controls without adding permanent panels.
 - No backend feature is removed by progressive disclosure; existing DOM controls and event handlers are moved into focused sheets so behavior stays intact.
 
 Apple / iPhone readiness:
