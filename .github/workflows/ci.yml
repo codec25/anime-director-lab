@@ -59,3 +59,7 @@ jobs:
           curl -fsS http://127.0.0.1:8123/take-api.php?action=state | grep -q '"ok":true'
           curl -fsS http://127.0.0.1:8123/continuity-review-api.php?action=state | grep -q '"ok":true'
           curl -fsS -X POST http://127.0.0.1:8123/sound-repair-api.php?action=sync | grep -q '"ok":true'
+
+      - name: End-to-end production flow
+        shell: bash
+        run: bash tests/production-flow-smoke.sh
