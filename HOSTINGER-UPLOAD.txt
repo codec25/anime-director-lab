@@ -26,6 +26,7 @@ Frontend:
 - assets/css/dialogue.css
 - assets/css/director.css
 - assets/css/production-stages.css
+- assets/css/progressive-disclosure.css
 - assets/css/scene-memory.css
 - assets/css/semantic-references.css
 - assets/css/sound-design.css
@@ -38,6 +39,7 @@ Frontend:
 - assets/js/dialogue.js
 - assets/js/director.js
 - assets/js/production-stages.js
+- assets/js/progressive-disclosure.js
 - assets/js/scene-memory.js
 - assets/js/semantic-references.js
 - assets/js/sound-design.js
@@ -84,6 +86,11 @@ Director UX:
 - Secondary shot actions are contextual: desktop right-click, touch long-press, or the visible `•••` overflow button.
 - Contextual actions reuse the existing real buttons/handlers instead of duplicating backend logic. Current menu actions include Reference, Revise, Continue story, Dialogue, Precision acting, and Advanced shot tools when those controls are available.
 - Dynamic Dialogue / Act-Two controls remain discoverable because the contextual layer observes shot-card changes and reads the live buttons each time the menu opens.
+- Progressive disclosure is used across later production stages instead of exposing every editor control at once.
+- In Review, Scene Bed and Music remain first-class while Mix continuity notes and Shot SFX/Foley management are collapsed secondary sections.
+- In Finish, sequence order and Render remain first-class. Per-clip trim/transition controls are collapsed under Edit clip; Audio tracks and Mix & master are collapsed secondary sections.
+- Reset rough cut, JSON export plan, continuity Re-direct and Precision acting are visually demoted power actions rather than competing with the stage's primary action.
+- No backend feature is removed by progressive disclosure; existing DOM controls and event handlers are moved into native details sections so behavior stays intact.
 
 Apple / iPhone readiness:
 - `viewport-fit=cover` plus safe-area padding are used for notched iPhones and standalone mode.
