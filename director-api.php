@@ -21,7 +21,16 @@ function addir_latest_take_for_shot(array $state, string $shotId): ?array {
         if ($take) return $take;
     }
     $matches = array_values(array_filter($state['takes'], static fn(array $t): bool => (string)($t['shot_id'] ?? '') === $shotId));
+    foreach (array_reverse($matches) as $take) if (!empty($take['selected'])) return $take;
     return $matches ? end($matches) : null;
+}
+function addir_fail_job(string $jobId,string $message):array {
+    return ad_state_mutate(function(array $s) use($jobId,$message):array {
+        $shotId='';
+        foreach($s['jobs'] as &$j) if(($j['id']??'')===$jobId){$j['status']='failed';$j['failed_at']=ad_now();$j['safe_error']=$message;$j['error']=$message;$shotId=(string)($j['shot_id']??'');break;}unset($j);
+        if($shotId!=='') foreach($s['shots'] as &$shot) if(($shot['id']??'')===$shotId){$shot['status']=!empty($shot['selected_take_id'])?'review':'draft';$shot['updated_at']=ad_now();break;}unset($shot);
+        return $s;
+    });
 }
 function addir_prompt(array $shot, ?array $character): string {
     $parts = [];
@@ -100,6 +109,7 @@ try {
                 $shot = addir_apply_plan($shot, $d);
                 $shot['revision_notes'] = ad_substr(trim((string)($d['revision_notes'] ?? $d['direction'] ?? '')), 0, 1000);
                 $shot['selected_take_id'] = null;
+                foreach($s['takes'] as &$take) if(is_array($take)&&(string)($take['shot_id']??'')===$shotId)$take['selected']=false;unset($take);
                 $shot['status'] = 'draft';
                 break;
             }
@@ -178,8 +188,7 @@ try {
             ad_event('describe_generation_submitted',['job_id'=>$jobId,'shot_id'=>$shotId,'provider'=>$providerId]);
             ad_json(['ok'=>true,'job'=>addir_find($updated['jobs'],$jobId),'estimated_cost_usd'=>$job['estimated_cost_usd']]);
         } catch (Throwable $e) {
-            $safe=ad_safe_provider_error($e);
-            ad_state_mutate(function(array $s) use ($jobId,$shotId,$safe): array { foreach($s['jobs'] as &$j) if(($j['id']??'')===$jobId){$j['status']='failed';$j['failed_at']=ad_now();$j['safe_error']=$safe['safe_error'];break;} unset($j); foreach($s['shots'] as &$shot) if(($shot['id']??'')===$shotId){$shot['status']='draft';$shot['updated_at']=ad_now();break;} unset($shot); return $s; });
+            $safe=ad_safe_provider_error($e);addir_fail_job($jobId,$safe['safe_error']);
             ad_json(['ok'=>false,'error'=>$safe['safe_error']],502);
         }
     }
@@ -195,12 +204,12 @@ try {
             if($status==='succeeded'){
                 $remote=trim((string)($result['output_url']??''));$local=$remote!==''?ad_download_result($remote,$jobId):null;
                 $take=ad_normalize_take(['id'=>ad_id('take'),'shot_id'=>(string)$job['shot_id'],'performance_id'=>'','generation_job_id'=>$jobId,'provider'=>(string)$job['provider'],'model'=>(string)$job['model'],'mode'=>'DESCRIBE_IT','remote_url'=>$remote,'local'=>$local,'attempt'=>(int)$job['attempt'],'mock'=>ad_mock_mode(),'created_at'=>ad_now()]);
-                $next=ad_state_mutate(function(array $s) use ($jobId,$take): array { foreach($s['jobs'] as &$j) if(($j['id']??'')===$jobId){$j['status']='completed';$j['completed_at']=ad_now();break;} unset($j);$s['takes'][]=$take;foreach($s['shots'] as &$shot) if(($shot['id']??'')===($take['shot_id']??'')){$shot['status']='review';$shot['updated_at']=ad_now();break;}unset($shot);return $s;});
-                ad_event('describe_generation_completed',['job_id'=>$jobId,'take_id'=>$take['id']]);ad_json(['ok'=>true,'job'=>addir_find($next['jobs'],$jobId),'take'=>$take,'done'=>true]);
+                $next=ad_state_mutate(function(array $s) use ($jobId,$take): array {foreach($s['jobs'] as &$j) if(($j['id']??'')===$jobId){$j['status']='completed';$j['completed_at']=ad_now();break;}unset($j);$autoSelect=false;foreach($s['shots'] as &$shot) if(($shot['id']??'')===($take['shot_id']??'')){$autoSelect=empty($shot['selected_take_id']);if($autoSelect)$shot['selected_take_id']=$take['id'];$shot['status']='review';$shot['updated_at']=ad_now();break;}unset($shot);$take['selected']=$autoSelect;$s['takes'][]=$take;return $s;});
+                $stored=addir_find($next['takes'],$take['id'])??$take;ad_event('describe_generation_completed',['job_id'=>$jobId,'take_id'=>$take['id']]);ad_json(['ok'=>true,'job'=>addir_find($next['jobs'],$jobId),'take'=>$stored,'done'=>true]);
             }
-            if($status==='failed'){$message=ad_substr((string)($result['error']??'Generation failed.'),0,400);$next=ad_state_mutate(function(array $s) use($jobId,$message):array{foreach($s['jobs'] as &$j)if(($j['id']??'')===$jobId){$j['status']='failed';$j['failed_at']=ad_now();$j['safe_error']=$message;break;}unset($j);return $s;});ad_json(['ok'=>true,'job'=>addir_find($next['jobs'],$jobId),'done'=>true]);}
+            if($status==='failed'){$message=ad_substr((string)($result['error']??'Generation failed.'),0,400);$next=addir_fail_job($jobId,$message);ad_json(['ok'=>true,'job'=>addir_find($next['jobs'],$jobId),'done'=>true,'failed'=>true]);}
             $next=ad_state_mutate(function(array $s) use($jobId,$status):array{foreach($s['jobs'] as &$j)if(($j['id']??'')===$jobId){$j['status']=$status==='queued'?'queued':'processing';if(empty($j['started_at']))$j['started_at']=ad_now();break;}unset($j);return $s;});ad_json(['ok'=>true,'job'=>addir_find($next['jobs'],$jobId),'done'=>false]);
-        } catch(Throwable $e){$safe=ad_safe_provider_error($e);ad_json(['ok'=>false,'error'=>$safe['safe_error']],502);}
+        } catch(Throwable $e){$safe=ad_safe_provider_error($e);addir_fail_job($jobId,$safe['safe_error']);ad_json(['ok'=>false,'error'=>$safe['safe_error']],502);}
     }
 
     ad_json(['ok'=>false,'error'=>'Unknown Director action.'],404);
