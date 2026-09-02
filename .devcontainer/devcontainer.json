@@ -1,0 +1,14 @@
+{
+  "name": "Anime Director PHP Preview",
+  "image": "mcr.microsoft.com/devcontainers/php:1-8.2-bookworm",
+  "forwardPorts": [8000],
+  "portsAttributes": {
+    "8000": {
+      "label": "Anime Director",
+      "onAutoForward": "openBrowser",
+      "visibility": "public"
+    }
+  },
+  "postCreateCommand": "mkdir -p storage && chmod -R 775 storage || true",
+  "postStartCommand": "php -S 0.0.0.0:8000 -t . >/tmp/anime-director-php.log 2>&1 &"
+}
