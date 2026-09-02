@@ -14,7 +14,7 @@
 <meta name="application-name" content="Anime Director">
 <title>Anime Director</title>
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="assets/css/director.css?v=004">
+<link rel="stylesheet" href="assets/css/director.css?v=005">
 <link rel="stylesheet" href="assets/css/world-memory.css?v=001">
 <link rel="stylesheet" href="assets/css/semantic-references.css?v=001">
 <link rel="stylesheet" href="assets/css/scene-memory.css?v=001">
@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="assets/css/continuity-review.css?v=001">
 <link rel="stylesheet" href="assets/css/sound-design.css?v=001">
 <link rel="stylesheet" href="assets/css/timeline.css?v=001">
-<link rel="stylesheet" href="assets/css/production-stages.css?v=003">
+<link rel="stylesheet" href="assets/css/production-stages.css?v=004">
 <link rel="stylesheet" href="assets/css/apple-ready.css?v=001">
 <link rel="stylesheet" href="assets/css/context-actions.css?v=001">
 <link rel="stylesheet" href="assets/css/progressive-disclosure.css?v=001">
@@ -33,7 +33,7 @@
 <div class="director-shell">
   <header class="director-topbar">
     <div class="brand"><span class="brand-mark">AD</span><span>Anime Director</span></div>
-    <div class="top-actions"><a class="ghost-btn" href="lab.php" style="text-decoration:none;display:grid;place-items:center">Advanced</a><button class="icon-btn" id="newDirection" type="button">＋ New</button></div>
+    <div class="top-actions"><a class="ghost-btn advanced-entry" href="lab.php" aria-label="Open Advanced workspace"><span class="advanced-label">Advanced</span><span class="advanced-more" aria-hidden="true">•••</span></a><button class="icon-btn" id="newDirection" type="button">＋ New shot</button></div>
   </header>
 
   <main>
@@ -51,7 +51,7 @@
         </div>
         <textarea class="director-input" id="directorPrompt" rows="3" placeholder="What happens next? Describe the action, camera, mood, dialogue, or change…" aria-label="Direct your next scene" enterkeyhint="send" autocapitalize="sentences" autocomplete="off" spellcheck="true"></textarea>
         <div class="compose-actions">
-          <div class="compose-left"><button class="mode-btn" id="directorMode" type="button">Guide me ▾</button></div>
+          <div class="compose-left"><button class="mode-btn" id="directorMode" type="button">Guide me ▾</button><button class="mode-btn quick-ideas-toggle" id="quickIdeasToggle" type="button" aria-expanded="false" aria-controls="quickRow">Ideas</button></div>
           <div class="compose-right"><button class="send-btn" id="directorSend" type="button" aria-label="Send direction">↑</button></div>
         </div>
       </div>
@@ -66,15 +66,9 @@
     </section>
   </main>
 </div>
-<nav class="bottom-nav" aria-label="Primary navigation">
-  <a href="director.php"><span class="nav-icon">⌂</span><span>Home</span></a>
-  <a href="lab.php#character"><span class="nav-icon">◎</span><span>Characters</span></a>
-  <a href="#" id="createNav" class="active"><span class="bottom-create">✦</span><span style="margin-top:25px">Direct</span></a>
-  <a href="lab.php"><span class="nav-icon">▦</span><span>Advanced</span></a>
-</nav>
 <script>window.AD_CONFIG={mock:<?= ad_mock_mode() ? 'true' : 'false' ?>};</script>
 <script src="assets/js/scene-memory.js?v=001"></script>
-<script src="assets/js/director.js?v=003"></script>
+<script src="assets/js/director.js?v=004"></script>
 <script src="assets/js/world-memory.js?v=001"></script>
 <script src="assets/js/semantic-references.js?v=001"></script>
 <script src="assets/js/dialogue.js?v=002"></script>
@@ -82,7 +76,7 @@
 <script src="assets/js/continuity-review.js?v=001"></script>
 <script src="assets/js/sound-design.js?v=001"></script>
 <script src="assets/js/timeline.js?v=003"></script>
-<script src="assets/js/production-stages.js?v=002"></script>
+<script src="assets/js/production-stages.js?v=003"></script>
 <script src="assets/js/apple-ready.js?v=001"></script>
 <script src="assets/js/context-actions.js?v=001"></script>
 <script src="assets/js/progressive-disclosure.js?v=001"></script>
