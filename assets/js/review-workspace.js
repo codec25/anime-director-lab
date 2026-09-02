@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 const $=(s,r=document)=>r.querySelector(s);
-let view=localStorage.getItem('ad_review_workspace')==='sound'?'sound':'continuity',timer=0;
+let view=localStorage.getItem('ad_review_workspace')==='sound'?'sound':'continuity';
 function inject(){
  const continuity=$('#continuityPanel'),sound=$('#soundDesignPanel');
  if(!continuity||!sound||$('#reviewWorkspaceSwitch'))return;
