@@ -28,9 +28,11 @@ function adcont_source_take(array $state, array $shot): ?array {
         if ($take && adcont_take_url($take) !== '') return $take;
     }
     $matches = array_values(array_filter($state['takes'], static fn(array $t): bool => (string)($t['shot_id'] ?? '') === $sourceShotId));
+    foreach(array_reverse($matches) as $take) if(!empty($take['selected']) && adcont_take_url($take)!=='') return $take;
     for ($i=count($matches)-1;$i>=0;$i--) if (adcont_take_url($matches[$i]) !== '') return $matches[$i];
     return null;
 }
+function adcont_fail_job(string $jobId,string $error):array{return ad_state_mutate(function(array$s)use($jobId,$error):array{$shotId='';foreach($s['jobs']as&$j)if(($j['id']??'')===$jobId){$j['status']='failed';$j['failed_at']=ad_now();$j['safe_error']=$error;$j['error']=$error;$shotId=(string)($j['shot_id']??'');break;}unset($j);if($shotId!=='')foreach($s['shots']as&$shot)if(($shot['id']??'')===$shotId){$shot['status']=!empty($shot['selected_take_id'])?'review':'draft';$shot['updated_at']=ad_now();break;}unset($shot);return$s;});}
 
 function adcont_prompt(array $shot): string {
     $parts = [
@@ -84,8 +86,7 @@ try {
             ad_event('native_continuation_submitted',['job_id'=>$jobId,'shot_id'=>$shotId,'source_take_id'=>$take['id']??null]);
             ad_json(['ok'=>true,'job'=>adcont_find($updated['jobs'],$jobId),'estimated_cost_usd'=>$job['estimated_cost_usd'],'source_take_id'=>$take['id']??null]);
         } catch(Throwable $e) {
-            $safe=ad_safe_provider_error($e);
-            ad_state_mutate(function(array $s)use($jobId,$shotId,$safe):array{foreach($s['jobs'] as &$j)if(($j['id']??'')===$jobId){$j['status']='failed';$j['failed_at']=ad_now();$j['safe_error']=$safe['safe_error'];break;}unset($j);foreach($s['shots'] as &$shot)if(($shot['id']??'')===$shotId){$shot['status']='draft';$shot['updated_at']=ad_now();break;}unset($shot);return $s;});
+            $safe=ad_safe_provider_error($e);adcont_fail_job($jobId,$safe['safe_error']);
             ad_json(['ok'=>false,'error'=>$safe['safe_error']],502);
         }
     }
@@ -102,18 +103,18 @@ try {
             if($status==='succeeded'){
                 $remote=trim((string)($result['output_url']??''));$local=$remote!==''?ad_download_result($remote,$jobId):null;
                 $take=ad_normalize_take(['id'=>ad_id('take'),'shot_id'=>(string)$job['shot_id'],'performance_id'=>'','generation_job_id'=>$jobId,'job_id'=>$jobId,'provider'=>(string)$job['provider'],'model'=>(string)$job['model'],'mode'=>'CONTINUE_SHOT','remote_url'=>$remote,'local'=>$local,'attempt'=>(int)$job['attempt'],'mock'=>!empty($result['mock']),'created_at'=>ad_now()]);
-                $next=ad_state_mutate(function(array $s)use($jobId,$take,$result):array{foreach($s['jobs']as &$j)if(($j['id']??'')===$jobId){$j['status']='completed';$j['completed_at']=ad_now();$j['raw']=$result['raw']??null;break;}unset($j);$s['takes'][]=$take;foreach($s['shots']as &$shot)if(($shot['id']??'')===($take['shot_id']??'')){$shot['status']='review';$shot['updated_at']=ad_now();break;}unset($shot);return $s;});
-                ad_event('native_continuation_completed',['job_id'=>$jobId,'take_id'=>$take['id'],'shot_id'=>$take['shot_id']]);
-                ad_json(['ok'=>true,'job'=>adcont_find($next['jobs'],$jobId),'take'=>$take,'done'=>true]);
+                $next=ad_state_mutate(function(array $s)use($jobId,$take,$result):array{foreach($s['jobs']as &$j)if(($j['id']??'')===$jobId){$j['status']='completed';$j['completed_at']=ad_now();$j['raw']=$result['raw']??null;break;}unset($j);$autoSelect=false;foreach($s['shots']as&$shot)if(($shot['id']??'')===($take['shot_id']??'')){$autoSelect=empty($shot['selected_take_id']);if($autoSelect)$shot['selected_take_id']=$take['id'];$shot['status']='review';$shot['updated_at']=ad_now();break;}unset($shot);$take['selected']=$autoSelect;$s['takes'][]=$take;return $s;});
+                $stored=adcont_find($next['takes'],$take['id'])??$take;ad_event('native_continuation_completed',['job_id'=>$jobId,'take_id'=>$take['id'],'shot_id'=>$take['shot_id']]);
+                ad_json(['ok'=>true,'job'=>adcont_find($next['jobs'],$jobId),'take'=>$stored,'done'=>true]);
             }
             if($status==='failed'){
                 $error=ad_substr((string)($result['error']??'Continuation failed.'),0,400);
-                $next=ad_state_mutate(function(array $s)use($jobId,$error):array{foreach($s['jobs']as &$j)if(($j['id']??'')===$jobId){$j['status']='failed';$j['failed_at']=ad_now();$j['safe_error']=$error;break;}unset($j);return $s;});
-                ad_json(['ok'=>true,'job'=>adcont_find($next['jobs'],$jobId),'done'=>true]);
+                $next=adcont_fail_job($jobId,$error);
+                ad_json(['ok'=>true,'job'=>adcont_find($next['jobs'],$jobId),'done'=>true,'failed'=>true]);
             }
             $next=ad_state_mutate(function(array $s)use($jobId,$status,$result):array{foreach($s['jobs']as &$j)if(($j['id']??'')===$jobId){$j['status']=$status;$j['raw']=$result['raw']??null;break;}unset($j);return $s;});
             ad_json(['ok'=>true,'job'=>adcont_find($next['jobs'],$jobId),'done'=>false]);
-        }catch(Throwable $e){$safe=ad_safe_provider_error($e);ad_json(['ok'=>false,'error'=>$safe['safe_error']],502);}
+        }catch(Throwable $e){$safe=ad_safe_provider_error($e);adcont_fail_job($jobId,$safe['safe_error']);ad_json(['ok'=>false,'error'=>$safe['safe_error']],502);}
     }
 
     ad_json(['ok'=>false,'error'=>'Unknown continuation action.'],404);
