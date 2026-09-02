@@ -38,4 +38,4 @@ jobs:
           while IFS= read -r -d '' file; do
             echo "node --check $file"
             node --check "$file"
-          done < <(find assets -type f -name '*.js' -print0)
+          done < <(find . -type f -name '*.js' -not -path './vendor/*' -not -path './node_modules/*' -print0)
