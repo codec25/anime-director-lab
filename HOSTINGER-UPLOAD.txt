@@ -14,7 +14,9 @@ Canonical creator product:
 - scene-memory-api.php
 - semantic-reference-api.php
 - sound-design-api.php
+- sound-repair-api.php
 - sw.js
+- take-api.php
 - timeline-api.php
 - world-api.php
 
@@ -28,9 +30,11 @@ Frontend:
 - assets/css/memory-disclosure.css
 - assets/css/production-stages.css
 - assets/css/progressive-disclosure.css
+- assets/css/review-workspace.css
 - assets/css/scene-memory.css
 - assets/css/semantic-references.css
 - assets/css/sound-design.css
+- assets/css/take-compare.css
 - assets/css/timeline.css
 - assets/css/world-memory.css
 - assets/js/act-two.js
@@ -42,9 +46,11 @@ Frontend:
 - assets/js/memory-disclosure.js
 - assets/js/production-stages.js
 - assets/js/progressive-disclosure.js
+- assets/js/review-workspace.js
 - assets/js/scene-memory.js
 - assets/js/semantic-references.js
 - assets/js/sound-design.js
+- assets/js/take-compare.js
 - assets/js/timeline.js
 - assets/js/world-memory.js
 
@@ -81,19 +87,19 @@ Director UX:
 - Main Director is intentionally organized into four stages: Direct, Perform, Review, Finish.
 - Direct contains prompt/shot creation plus compact World/Scene Memory summaries.
 - Perform contains compact Cast + Voices plus the same shot cards so Dialogue / Precision passes remain contextual.
-- Review contains Continuity Review + Sound Design.
+- Review uses a compact Continuity / Sound switch and shows one substantial workspace at a time.
 - Finish contains the Director Timeline + export.
 - The former capability showcase and decorative memory cards were removed from the main page to avoid feature stacking; underlying APIs remain intact.
 - Shot cards keep only the current primary generation/check action visible.
 - Secondary shot actions are contextual: desktop right-click, touch long-press, or the visible `•••` overflow button.
-- Contextual actions reuse the existing real buttons/handlers instead of duplicating backend logic. Current menu actions include Reference, Revise, Continue story, Dialogue, Precision acting, and Advanced shot tools when those controls are available.
+- Contextual actions reuse the existing real buttons/handlers instead of duplicating backend logic. Current menu actions include Compare takes, Reference, Revise, Continue story, Dialogue, Precision acting, and Advanced shot tools when those controls are available. Compare takes appears only when at least two usable takes exist.
 - Dynamic Dialogue / Act-Two controls remain discoverable because the contextual layer observes shot-card changes and reads the live buttons each time the menu opens.
 - Progressive disclosure is used across later production stages instead of exposing every editor control at once.
 - In Direct, World Memory keeps its summary visible while references/form controls sit under World options. Scene Memory keeps active-scene switching visible while presets, plates and detailed overrides sit under Scene options.
 - In Perform, the cast overview remains visible while character/voice setup forms sit under Cast setup. Dialogue stays shot-contextual through the shot menu/sheet.
 - In Review, Scene Bed and Music remain first-class while Mix continuity notes and Shot SFX/Foley management are collapsed secondary sections.
 - In Finish, sequence order and Render remain first-class. Per-clip trim/transition controls are collapsed under Edit clip; Audio tracks and Mix & master are collapsed secondary sections.
-- Reset rough cut, JSON export plan, continuity Re-direct and Precision acting are visually demoted power actions rather than competing with the stage's primary action.
+- Rebuild from approved takes, edit-plan download, continuity Re-direct and Precision acting are visually demoted power actions rather than competing with the stage's primary action.
 - No backend feature is removed by progressive disclosure; existing DOM controls and event handlers are moved into native details sections so behavior stays intact.
 
 Apple / iPhone readiness:
@@ -101,7 +107,7 @@ Apple / iPhone readiness:
 - Primary custom controls meet a 44px minimum coarse-pointer target and have visible press/focus states.
 - Inputs use at least 16px text on touch devices to avoid Safari focus zoom.
 - `prefers-reduced-motion` and `prefers-contrast: more` are supported.
-- VisualViewport hides the bottom navigation while the iPhone keyboard is open so it does not compete with the Director prompt.
+- VisualViewport reduces keyboard-open shell spacing so the iPhone keyboard does not compete with the Director prompt.
 - Production-stage buttons expose pressed/current-step accessibility state.
 - `manifest.webmanifest` enables a standalone installable web-app shell.
 - `sw.js` caches static CSS/JS only; it deliberately does not cache PHP pages or API routes, preventing stale production state.
