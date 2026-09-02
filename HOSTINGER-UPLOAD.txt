@@ -9,15 +9,18 @@ Canonical creator product:
 - director.php
 - index.php
 - lab.php
+- manifest.webmanifest
 - reference-api.php
 - scene-memory-api.php
 - semantic-reference-api.php
 - sound-design-api.php
+- sw.js
 - timeline-api.php
 - world-api.php
 
 Frontend:
 - assets/css/act-two.css
+- assets/css/apple-ready.css
 - assets/css/continuity-review.css
 - assets/css/dialogue.css
 - assets/css/director.css
@@ -28,6 +31,7 @@ Frontend:
 - assets/css/timeline.css
 - assets/css/world-memory.css
 - assets/js/act-two.js
+- assets/js/apple-ready.js
 - assets/js/continuity-review.js
 - assets/js/dialogue.js
 - assets/js/director.js
@@ -74,6 +78,18 @@ Director UX:
 - Review contains Continuity Review + Sound Design.
 - Finish contains the Director Timeline + export.
 - The former capability showcase and decorative memory cards were removed from the main page to avoid feature stacking; underlying APIs remain intact.
+
+Apple / iPhone readiness:
+- `viewport-fit=cover` plus safe-area padding are used for notched iPhones and standalone mode.
+- Primary custom controls meet a 44px minimum coarse-pointer target and have visible press/focus states.
+- Inputs use at least 16px text on touch devices to avoid Safari focus zoom.
+- `prefers-reduced-motion` and `prefers-contrast: more` are supported.
+- VisualViewport hides the bottom navigation while the iPhone keyboard is open so it does not compete with the Director prompt.
+- Production-stage buttons expose pressed/current-step accessibility state.
+- `manifest.webmanifest` enables a standalone installable web-app shell.
+- `sw.js` caches static CSS/JS only; it deliberately does not cache PHP pages or API routes, preventing stale production state.
+- Final App Store packaging can later use the same PHP/API backend with a Capacitor/native shell. Xcode/macOS are still required only for final iOS compilation, signing, TestFlight and App Store submission.
+- A final production app icon / Apple touch icon is intentionally not fabricated in code; add the approved brand artwork before store submission.
 
 Live provider requirements:
 - RUNWAY_API_KEY=...
