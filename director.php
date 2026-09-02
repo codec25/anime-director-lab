@@ -28,6 +28,8 @@
 <link rel="stylesheet" href="assets/css/context-actions.css?v=001">
 <link rel="stylesheet" href="assets/css/progressive-disclosure.css?v=001">
 <link rel="stylesheet" href="assets/css/memory-disclosure.css?v=001">
+<link rel="stylesheet" href="assets/css/review-workspace.css?v=001">
+<link rel="stylesheet" href="assets/css/take-compare.css?v=001">
 </head>
 <body>
 <div class="director-shell">
@@ -68,17 +70,19 @@
 </div>
 <script>window.AD_CONFIG={mock:<?= ad_mock_mode() ? 'true' : 'false' ?>};</script>
 <script src="assets/js/scene-memory.js?v=001"></script>
-<script src="assets/js/director.js?v=004"></script>
+<script src="assets/js/director.js?v=005"></script>
 <script src="assets/js/world-memory.js?v=001"></script>
 <script src="assets/js/semantic-references.js?v=001"></script>
 <script src="assets/js/dialogue.js?v=002"></script>
 <script src="assets/js/act-two.js?v=001"></script>
-<script src="assets/js/continuity-review.js?v=001"></script>
+<script src="assets/js/continuity-review.js?v=002"></script>
 <script src="assets/js/sound-design.js?v=001"></script>
-<script src="assets/js/timeline.js?v=003"></script>
-<script src="assets/js/production-stages.js?v=003"></script>
+<script src="assets/js/timeline.js?v=004"></script>
+<script src="assets/js/review-workspace.js?v=001"></script>
+<script src="assets/js/production-stages.js?v=004"></script>
 <script src="assets/js/apple-ready.js?v=001"></script>
-<script src="assets/js/context-actions.js?v=001"></script>
+<script src="assets/js/context-actions.js?v=002"></script>
+<script src="assets/js/take-compare.js?v=001"></script>
 <script src="assets/js/progressive-disclosure.js?v=001"></script>
 <script src="assets/js/memory-disclosure.js?v=001"></script>
 </body>
