@@ -11,6 +11,7 @@ function ad_ensure_runtime_dirs(): void {
         AD_STORAGE_DIR . '/characters',
         AD_STORAGE_DIR . '/performances',
         AD_STORAGE_DIR . '/results',
+        AD_STORAGE_DIR . '/references',
     ] as $dir) {
         if (!is_dir($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) {
             throw new RuntimeException('Unable to create runtime directory: ' . $dir);
@@ -79,9 +80,7 @@ function ad_base_url(): string {
 
 function ad_public_media_url(string $relativePath): string {
     $relativePath = ltrim(str_replace('\\', '/', $relativePath), '/');
-    if (str_contains($relativePath, '..')) {
-        throw new InvalidArgumentException('Invalid media path.');
-    }
+    if (str_contains($relativePath, '..')) throw new InvalidArgumentException('Invalid media path.');
     return ad_base_url() . '/' . $relativePath;
 }
 
@@ -90,8 +89,9 @@ require_once AD_ROOT . '/app/state.php';
 require_once AD_ROOT . '/app/storage.php';
 require_once AD_ROOT . '/app/providers/ProviderInterface.php';
 require_once AD_ROOT . '/app/providers/RunwayProvider.php';
+require_once AD_ROOT . '/app/providers/RunwayActTwoProvider.php';
+require_once AD_ROOT . '/app/providers/RunwayDescribeProvider.php';
+require_once AD_ROOT . '/app/providers/RunwayReferenceProvider.php';
+require_once AD_ROOT . '/app/providers/RunwayContinueProvider.php';
 require_once AD_ROOT . '/app/providers/ViduProvider.php';
-require_once AD_ROOT . '/app/providers/KlingProvider.php';
-require_once AD_ROOT . '/app/providers/GoogleProvider.php';
-require_once AD_ROOT . '/app/providers/WanProvider.php';
 require_once AD_ROOT . '/app/gateway.php';

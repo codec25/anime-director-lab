@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      - name: Lint PHP
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' file; do
+            echo "php -l $file"
+            php -l "$file"
+          done < <(find . -type f -name '*.php' -not -path './vendor/*' -print0)
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' file; do
+            echo "node --check $file"
+            node --check "$file"
+          done < <(find . -type f -name '*.js' -not -path './vendor/*' -not -path './node_modules/*' -print0)
+
+      - name: Audit active Director surface
+        shell: bash
+        run: php tests/director-surface-audit.php
+
+      - name: Mock Director integration smoke test
+        shell: bash
+        env:
+          ANIME_DIRECTOR_MOCK_MODE: '1'
+        run: |
+          set -euo pipefail
+          php -S 127.0.0.1:8123 >/tmp/anime-director-php.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:8123/director.php >/tmp/director.html; then break; fi
+            sleep 0.2
+          done
+          grep -q "What do you want" /tmp/director.html
+          grep -q "director-focus.js" /tmp/director.html
+          curl -fsS http://127.0.0.1:8123/api.php?action=state | grep -q '"ok":true'
+          curl -fsS http://127.0.0.1:8123/timeline-api.php?action=state | grep -q '"ok":true'
+          curl -fsS http://127.0.0.1:8123/take-api.php?action=state | grep -q '"ok":true'
+          curl -fsS http://127.0.0.1:8123/continuity-review-api.php?action=state | grep -q '"ok":true'
+          curl -fsS -X POST http://127.0.0.1:8123/sound-repair-api.php?action=sync | grep -q '"ok":true'
+
+      - name: End-to-end production flow
+        shell: bash
+        run: bash tests/production-flow-smoke.sh
+
+      - name: Package full source
+        shell: bash
+        run: |
+          set -euo pipefail
+          zip -qr anime-director-full.zip . \
+            -x '.git/*' \
+            -x 'anime-director-full.zip'
+
+      - name: Upload full source package
+        uses: actions/upload-artifact@v4
+        with:
+          name: anime-director-full
+          path: anime-director-full.zip
+          if-no-files-found: error
+          retention-days: 7

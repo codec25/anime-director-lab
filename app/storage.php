@@ -67,6 +67,53 @@ function ad_store_upload(array $file, string $bucket, ?string $role = null): arr
     ];
 }
 
+function ad_store_director_reference(array $file): array {
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) throw new RuntimeException('Reference upload failed.');
+    $tmp = (string)($file['tmp_name'] ?? '');
+    if ($tmp === '' || !is_uploaded_file($tmp)) throw new RuntimeException('Invalid reference upload.');
+    $size = (int)($file['size'] ?? 0);
+    if ($size < 1 || $size > 120 * 1024 * 1024) throw new RuntimeException('Reference file is too large.');
+
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mime = (string)$finfo->file($tmp);
+    $allowed = [
+        'image/jpeg' => ['jpg','image'], 'image/png' => ['png','image'], 'image/webp' => ['webp','image'],
+        'video/mp4' => ['mp4','video'], 'video/quicktime' => ['mov','video'],
+        'audio/mpeg' => ['mp3','audio'], 'audio/wav' => ['wav','audio'], 'audio/x-wav' => ['wav','audio'],
+        'audio/mp4' => ['m4a','audio'], 'audio/aac' => ['aac','audio'],
+    ];
+    if (!isset($allowed[$mime])) throw new RuntimeException('Use JPG, PNG, WebP, MP4, MOV, MP3, WAV, M4A, or AAC.');
+    [$ext, $kind] = $allowed[$mime];
+    if ($kind === 'image' && @getimagesize($tmp) === false) throw new RuntimeException('The reference image could not be validated.');
+
+    $id = ad_id('ref');
+    $relative = ad_safe_storage_relative('storage/references/' . $id . '.' . $ext);
+    $dest = AD_ROOT . '/' . $relative;
+    $dir = dirname($dest);
+    if (!is_dir($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) throw new RuntimeException('Could not prepare reference storage.');
+    if (!move_uploaded_file($tmp, $dest)) throw new RuntimeException('Could not save reference.');
+    @chmod($dest, 0644);
+    return [
+        'id' => $id,
+        'kind' => $kind,
+        'path' => $relative,
+        'url' => ad_public_media_url($relative),
+        'mime' => $mime,
+        'bytes' => filesize($dest) ?: $size,
+        'original_name' => basename((string)($file['name'] ?? ($id . '.' . $ext))),
+        'created_at' => ad_now(),
+    ];
+}
+
+function ad_shot_visual_reference(array $shot): ?array {
+    $refs = is_array($shot['references'] ?? null) ? $shot['references'] : [];
+    for ($i = count($refs) - 1; $i >= 0; $i--) {
+        $ref = $refs[$i] ?? null;
+        if (is_array($ref) && ($ref['kind'] ?? '') === 'image' && !empty($ref['url'])) return $ref;
+    }
+    return null;
+}
+
 function ad_download_result(string $url, string $jobId): ?array {
     if (!preg_match('#^https://#i', $url)) return null;
     $destName = preg_replace('/[^A-Za-z0-9_-]/', '_', $jobId) . '.mp4';
@@ -82,7 +129,7 @@ function ad_download_result(string $url, string $jobId): ?array {
         CURLOPT_MAXREDIRS => 4,
         CURLOPT_CONNECTTIMEOUT => 15,
         CURLOPT_TIMEOUT => 300,
-        CURLOPT_USERAGENT => 'AnimeDirectorLab/0.01',
+        CURLOPT_USERAGENT => 'AnimeDirectorLab/0.02',
         CURLOPT_WRITEFUNCTION => static function($ch, string $data) use ($fh, &$written): int {
             $written += strlen($data);
             if ($written > 300 * 1024 * 1024) return 0;

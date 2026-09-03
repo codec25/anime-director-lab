@@ -1,106 +1,122 @@
-# Anime Director Lab — Architecture
+# Anime Director — Architecture
 
-## 1. Product mission
+## Product mission
 
-Anime Director is not a generic AI anime generator.
+Anime Director is a Director-first AI anime filmmaking workspace. The creator describes, performs, revises, references and continues shots while the app preserves production context underneath.
 
-**Perform it. Direct it. Animate it.**
+The normal product should feel simple:
 
-The creator remains the director/performer. AI executes difficult animation work. The lab validates whether one locked original character can convincingly perform a human-recorded movement across takes and providers.
+`Direct → Generate → Review → Revise / Continue → Build Scene`
 
-## 2. Production hierarchy
+The Advanced workspace exists for technical controls such as ACT IT, provider comparisons and manual shot details. It must not compete with the creator-facing workflow.
 
-```
+## Canonical routes
+
+- `index.php` → product entry / Director redirect
+- `director.php` → primary creator workspace
+- `lab.php` → Advanced workspace
+- `api.php` → shared production/state API
+- `director-api.php` → references, revisions and describe-to-video generation
+- `continue-api.php` → native video continuation
+
+There must not be two competing creator home screens.
+
+## Production hierarchy
+
+```text
 PRODUCTION
 ├── Character Bible
-├── World Bible (stub)
+├── World / location context
 ├── Scenes
 │   └── Shots
-│       ├── Performances (human source)
+│       ├── Director instructions
+│       ├── Shot references
+│       ├── Revision history
+│       ├── Continuity source
+│       ├── Performance source (optional ACT IT)
 │       ├── Generation Jobs
 │       └── Generated Takes
-└── Final Cut (selected takes / future export)
+└── Final sequence / export
 ```
 
-Current lab defaults to one production and Scene 01.
+## Character continuity
 
-## 3. Character Bible ownership
+Character identity belongs to the Character Bible, never to a provider ID. The locked master reference and character notes remain reusable across provider changes.
 
-The Character Bible owns identity:
+## Director references
 
-- versioned character record (`AKIO-v1`)
-- identity notes (body, face, hair, eyes, outfit, movement, voice)
-- canonical reference roles (`master_front`, `three_quarter`, `portrait`, …)
-- optional `provider_bindings` beneath the bible
+A shot can own image, video or audio references. References stay attached to the shot and therefore survive revisions.
 
-Canonical character identity must never depend on a provider ID.
+Current generation behavior:
+- latest image shot reference can become the primary visual prompt for `DESCRIBE_SHOT`
+- other reference types remain production context until the selected provider supports native multi-reference binding
 
-Creation paths prepared in UX:
+## Revisions
 
-1. Upload character
-2. Import character sheet
-3. Generated reference (future)
-4. Draw character (future)
+A revision modifies the existing shot instead of creating an unrelated replacement. Revision history preserves the previous direction. Unspecified camera, ratio and style fields stay intact. Any previous selected take is cleared when the shot is revised so a new execution can be reviewed explicitly.
 
-## 4. Performance vs generated take
+## Native continuation
 
-Critical distinction:
+A continued shot records:
+- `continuity_from_shot_id`
+- `source_take_id`
+- the new next-action direction
 
-- **Performance** = human-recorded source media for ACT IT
-- **Generated take** = provider output for a shot/job
+When the previous shot has a usable generated take, Anime Director uses Runway Seedance 2.5 video-to-video `extend` through the `CONTINUE_SHOT` capability. The prior generated video is supplied directly as `promptVideo`, so continuity is based on the real source video rather than only text metadata.
 
-A recorded performance is never collapsed into final scene media. Directors compare generated takes and choose one.
+If the previous shot has no generated take yet, the continuation shot is still created but native continuation generation remains blocked until a source take exists.
 
-## 5. AI Gateway
+Normal first-shot generation remains separate and uses `DESCRIBE_SHOT` (currently Runway Gen-4.5).
 
-Application code requests **capabilities**, not raw vendor model names:
+## Two creation paths
 
-`ACT_IT`, `ANIMATE_SHOT`, `DESCRIBE_SHOT`, `DIALOGUE`, `CONTINUE_SHOT`, `LIP_SYNC`, `ANIME_BOOST`, `SOUND_EFFECT`
+### DIRECT IT
 
-Providers are adapters. Implemented: Runway, Vidu. Stubs: Kling, Google, Wan/local.
+Natural-language direction creates `DESCRIBE_IT` shots. A describe-to-video provider can generate normal shots directly from those instructions and character/reference context.
 
-Secrets stay server-side in `.env`. Frontend only receives availability/cost/limitation metadata.
+### ACT IT
 
-## 6. Generation jobs
+When motion fidelity matters more — acting, dance, martial movement, gesture, timing — the creator can upload a human performance in Advanced and generate an `ACT_IT` take.
 
-Jobs track capability, provider, model, attempt, provider job id, timestamps, estimated/actual cost, and safe errors.
+Both paths use the same scenes, shots and takes. They are not separate products.
 
-Statuses: `queued` → `submitted` → `processing` → `completed` | `failed` | `cancelled`.
+## Capability gateway
 
-Policy: **max 3 attempts per provider per shot**. No silent paid retries beyond that.
+Application code requests capabilities rather than exposing provider-specific model logic throughout the UI:
 
-## 7. Anime Boost
+- `ACT_IT`
+- `ANIMATE_SHOT`
+- `DESCRIBE_SHOT`
+- `CONTINUE_SHOT`
+- `DIALOGUE`
+- `LIP_SYNC`
+- `ANIME_BOOST`
+- `SOUND_EFFECT`
 
-Anime Boost is a **distinct direction layer** after performance direction.
+Current implemented provider paths:
+- Runway Act-Two → `ACT_IT`
+- Runway Gen-4.5 → `DESCRIBE_SHOT`
+- Runway Seedance 2.5 Extend → `CONTINUE_SHOT`
+- Vidu Motion Sync 2.5 → `ACT_IT`
 
-Modes: `natural` | `anime` | `extreme`.
+Secrets remain server-side.
 
-Structured metadata (anticipation, exaggeration, impact, follow-through, speed, camera reaction, vfx intensity) is stored even when providers cannot consume it yet.
+## Jobs and spend safety
 
-Two future layers:
+Generation jobs track provider/model/capability, attempts, task IDs, timestamps, estimated cost and safe errors. Paid provider attempts remain capped at three per provider per shot. Creator-facing generation requires an explicit action; the app must not silently spend credits.
 
-1. AI motion/style enhancement
-2. Editable post/compositing effects (speed lines, impact flash, SFX, …)
+## Anime Boost
 
-Do not claim these are fully solved provider features today.
+Anime Boost is direction metadata layered over a shot. It can encode anticipation, exaggeration, impact, follow-through, speed, camera reaction and VFX intensity. The UI must not claim an effect is rendered unless the active provider or post pipeline really supports it.
 
-## 8. Benchmark system
+## Product rule
 
-A1–A4 / B1–B4 tests with 12-part scoring, CPS / PPS / DUS, usable yes/no, attempt + cost tracking, and a compact provider×test summary.
+Only show creator-facing controls that perform a real action. Experimental diagnostics, scoring, provider comparison and performance tooling belong in Advanced. Dead-end buttons, duplicate scripts, fake controls and competing navigation paths should be removed rather than preserved for history.
 
-## 9. What is experimental
+## Next production layers
 
-- Mock ACT IT workflow (no paid spend)
-- DESCRIBE IT architecture/UI without live generation
-- Anime Boost as creative direction metadata
-- Scene filmstrip / cheap animatic placeholders
-- Stub provider adapters
-
-## 10. Deliberately not built yet
-
-- Accounts / auth / subscriptions / billing
-- Social, community, marketplace
-- Full drawing canvas or local character generator
-- Giant timeline / After Effects compositor
-- Live Kling / Google / Wan integrations
-- World Bible depth, collaboration, SHORTS merge
+1. provider-native multi-reference binding
+2. persistent world/location memory
+3. dialogue, voices and lip sync
+4. sound design
+5. longer multi-shot orchestration and final-cut export

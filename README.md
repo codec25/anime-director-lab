@@ -1,68 +1,71 @@
-# Anime Director Lab 0.01 — The Akio Test
+# Anime Director
 
-A deliberately small, standalone research lab for testing the core Anime Director hypothesis:
+Anime Director is a Director-first AI anime filmmaking workspace.
 
-> Can one persistent original anime character convincingly perform a human-recorded movement, across repeated takes and providers?
+The creator describes what should happen, generates a take, then revises or continues the scene while the app keeps character, shot, reference and continuity context underneath.
 
-## What this build does
+## Main workflow
 
-- Locks one canonical character (`AKIO-v1` by default).
-- Uploads controlled ACT IT performance clips (A1–A4 / B1–B4).
-- Creates shot records separately from performances.
-- Stores Anime Boost direction (`natural`, `anime`, `extreme`) separately from the source motion.
-- Routes ACT IT generation through provider adapters.
-- Includes current adapters for Runway Act-Two and Vidu Motion Sync 2.5.
-- Enforces max 3 attempts per provider per shot.
-- Polls asynchronous generation jobs.
-- Downloads completed remote results locally when possible.
-- Compares takes and lets the director select one.
-- Scores the 12-part benchmark and calculates CPS/PPS/DUS.
-- Records estimated spend so the experiment measures cost per accepted take.
-- Has mock mode for verifying the workflow before spending AI credits.
+1. Lock a character in Advanced.
+2. Direct a shot in natural language.
+3. Generate the shot with the configured describe provider.
+4. Review the generated take.
+5. Revise the same shot or continue into the next one.
+6. Add image/video/audio references when needed.
+7. Use ACT IT in Advanced when exact human motion is more important than text prompting.
 
-## What this build intentionally does NOT do
+## Product routes
 
-- No accounts or subscriptions.
-- No social/community features.
-- No episode manager.
-- No giant timeline.
-- No AI image generation yet.
-- No Wan GPU runner yet (Wan2.2-Animate remains an external/open-source benchmark).
-- Anime Boost is direction metadata in 0.01; final generative/compositing amplification is a separate experiment after ACT IT fidelity is validated.
+- `/` → Anime Director entry
+- `/director.php` → primary creator workspace
+- `/lab.php` → Advanced workspace
 
-## Setup
+## Current real capabilities
 
-1. Upload this folder as its own app. Do not merge it into SHORTS.
-2. Copy `.env.example` to `.env`.
-3. Set `ANIME_DIRECTOR_BASE_URL` to the public HTTPS URL of this folder.
-4. Leave `ANIME_DIRECTOR_MOCK_MODE=1` while checking the workflow.
-5. For live tests set it to `0` and provide provider keys:
-   - `RUNWAY_API_KEY`
-   - `VIDU_API_KEY`
-6. Ensure PHP has cURL + fileinfo enabled and `storage/` + `data/` are writable by PHP.
+### Natural-language shot generation
 
-See `ARCHITECTURE.md` for the foundation data model (Character Bible, performances vs takes, AI Gateway, Anime Boost, scenes).
+Normal directed shots use the `DESCRIBE_SHOT` capability. The current implementation uses Runway Gen-4.5 for text/image-to-video.
 
-## Benchmark order
+### Character continuity
 
-1. A1 neutral acting
-2. A2 emotional dialogue
-3. A3 gesture
-4. A4 upper-body action
-5. B1 walk & turn
-6. B2 groove / footwork
-7. B3 martial combination
-8. B4 jump / turn
+The Character Bible owns the canonical character identity and master references. Provider IDs never become the source of truth for the character.
 
-Start with A1. Do not burn credits on all eight before the simplest test passes.
+### Shot references
 
-## Security
+Each shot can store image, video or audio references. The latest visual image reference can guide normal describe-to-video generation; other references stay attached to the shot for provider integrations that can consume them later.
 
-- Keep `.env` outside Git.
-- Uploads are MIME-validated and randomly renamed.
-- PHP/script execution is blocked inside `storage/` via `.htaccess`.
-- Production use will need authentication, CSRF protection, quotas, object storage, retention controls, and provider webhook verification. This lab is not a public SaaS release.
+### Conversational revisions
 
-## SHORTS relationship
+`Revise` updates the existing shot, stores revision history, keeps unspecified camera/ratio/style settings, and clears the old approval so a fresh take can be generated.
 
-SHORTS remains separate. This lab borrows only proven concepts: safe media storage, takes, asynchronous jobs, retries/attempt discipline, cost events, and selected-take workflow.
+### Native video continuation
+
+`Continue` creates a linked next shot. If the prior shot has a generated take, the next shot can use that actual video as its continuity source through Runway Seedance 2.5 video-to-video `extend`.
+
+This is stronger than carrying only a text prompt: the previous moving video becomes the input to the next generation.
+
+If there is no prior generated take yet, Anime Director tells the creator to generate the source shot first.
+
+### ACT IT
+
+Advanced retains performance-driven generation for acting, dance, martial movement and other motion where a human performance should drive the character.
+
+## Provider safety
+
+Secrets remain in server-side environment variables. The creator must explicitly start paid generation. Accepted paid attempts are capped at three per provider per shot.
+
+Live Runway setup requires:
+
+```text
+RUNWAY_API_KEY=...
+ANIME_DIRECTOR_BASE_URL=https://your-public-app-url
+ANIME_DIRECTOR_MOCK_MODE=0
+```
+
+Never commit `.env`.
+
+## Architecture principle
+
+The normal creator experience must stay simple. If a control does not perform a real action, it should not appear in Director. Technical diagnostics and provider experimentation belong in Advanced.
+
+See `ARCHITECTURE.md` for the production model and `HOSTINGER-UPLOAD.txt` for deployment files.

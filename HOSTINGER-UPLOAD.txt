@@ -1,30 +1,170 @@
-anime_director_lab/
-├── .env.example
-├── .gitignore
-├── .htaccess
-├── README.md
-├── RESEARCH-NOTES.md
-├── api.php
-├── index.php
-├── app/
-│   ├── .htaccess
-│   ├── bootstrap.php
-│   ├── state.php
-│   ├── storage.php
-│   └── providers/
-│       ├── ProviderInterface.php
-│       ├── RunwayProvider.php
-│       └── ViduProvider.php
-├── assets/
-│   ├── css/
-│   │   └── app.css
-│   └── js/
-│       └── app.js
-├── data/
-│   ├── .gitkeep
-│   └── .htaccess
-└── storage/
-    ├── .htaccess
-    ├── characters/.gitkeep
-    ├── performances/.gitkeep
-    └── results/.gitkeep
+Anime Director — current branch upload map
+
+Canonical creator product:
+- act-two-api.php
+- act-two-source-api.php
+- continue-api.php
+- continuity-review-api.php
+- dialogue-api.php
+- director-api.php
+- director.php
+- index.php
+- lab.php
+- manifest.webmanifest
+- reference-api.php
+- scene-memory-api.php
+- semantic-reference-api.php
+- sound-design-api.php
+- sound-repair-api.php
+- sw.js
+- take-api.php
+- timeline-api.php
+- world-api.php
+
+Frontend:
+- assets/css/act-two.css
+- assets/css/advanced-product.css
+- assets/css/apple-ready.css
+- assets/css/context-actions.css
+- assets/css/continuity-review.css
+- assets/css/dialogue.css
+- assets/css/director-focus.css
+- assets/css/director.css
+- assets/css/first-film-flow.css
+- assets/css/first-run-character.css
+- assets/css/conversational-edit.css
+- assets/css/generation-experience.css
+- assets/css/memory-sheets.css
+- assets/css/production-readiness.css
+- assets/css/production-stages.css
+- assets/css/progressive-disclosure.css
+- assets/css/recovery-experience.css
+- assets/css/review-workspace.css
+- assets/css/scene-memory.css
+- assets/css/semantic-references.css
+- assets/css/sound-design.css
+- assets/css/take-compare.css
+- assets/css/timeline.css
+- assets/css/world-memory.css
+- assets/js/act-two.js
+- assets/js/apple-ready.js
+- assets/js/context-actions.js
+- assets/js/continuity-review.js
+- assets/js/dialogue.js
+- assets/js/director.js
+- assets/js/director-focus.js
+- assets/js/first-film-flow.js
+- assets/js/first-run-character.js
+- assets/js/conversational-edit.js
+- assets/js/generation-experience.js
+- assets/js/memory-sheets.js
+- assets/js/production-readiness.js
+- assets/js/production-stages.js
+- assets/js/progressive-disclosure.js
+- assets/js/recovery-experience.js
+- assets/js/review-workspace.js
+- assets/js/scene-memory.js
+- assets/js/semantic-references.js
+- assets/js/sound-design.js
+- assets/js/take-compare.js
+- assets/js/timeline.js
+- assets/js/ui-observer.js
+- assets/js/world-memory.js
+
+Backend additions/changes:
+- app/bootstrap.php
+- app/gateway.php
+- app/storage.php
+- app/providers/RunwayActTwoProvider.php
+- app/providers/RunwayContinueProvider.php
+- app/providers/RunwayDescribeProvider.php
+- app/providers/RunwayReferenceProvider.php
+
+CI / repository validation:
+- .github/workflows/ci.yml
+- tests/director-surface-audit.php
+
+Server routing/docs:
+- .htaccess
+- ARCHITECTURE.md
+- README.md
+
+Existing shared files still required on the server:
+- api.php
+- app/schema.php
+- app/state.php
+- app/providers/ProviderInterface.php
+- app/providers/RunwayProvider.php
+- app/providers/ViduProvider.php
+- assets/css/app.css
+- assets/js/app.js
+
+Do not upload `.env` from Git. Keep provider keys server-side.
+
+Director UX:
+- The unified `•••` tools sheet keeps World & scenes, Performance, Review, Finish film, Production status and Advanced reachable while the main Director remains prompt-first.
+- World/Scene context and production recovery are secondary workspaces, not permanent panels; they remain one interaction away and reuse the existing APIs and controls.
+- Main Director is intentionally organized into four stages: Direct, Perform, Review, Finish.
+- Direct contains prompt/shot creation plus compact World/Scene Memory summaries.
+- Perform contains compact Cast + Voices plus the same shot cards so Dialogue / Precision passes remain contextual.
+- Review uses a compact Continuity / Sound switch and shows one substantial workspace at a time.
+- Finish contains the Director Timeline + export.
+- The former capability showcase and decorative memory cards were removed from the main page to avoid feature stacking; underlying APIs remain intact.
+- Shot cards keep only the current primary generation/check action visible.
+- Secondary shot actions are contextual: desktop right-click, touch long-press, or the visible `•••` overflow button.
+- Contextual actions reuse the existing real buttons/handlers instead of duplicating backend logic. Current menu actions include Compare takes, Reference, Revise, Continue story, Dialogue, Precision acting, and Advanced shot tools when those controls are available. Compare takes appears only when at least two usable takes exist.
+- Dynamic Dialogue / Act-Two controls remain discoverable because the contextual layer observes shot-card changes and reads the live buttons each time the menu opens.
+- Progressive disclosure is used across later production stages instead of exposing every editor control at once.
+- In Direct, World and Scene summaries remain visible while their references and forms open in focused sheets. Active-scene switching stays immediate.
+- In Perform, the cast overview remains visible while character/voice setup opens in a focused sheet. Dialogue stays shot-contextual through the shot menu/sheet.
+- In Review, Scene Bed and Music remain first-class while Mix continuity notes and Shot SFX/Foley management are collapsed secondary sections.
+- In Finish, sequence order and Render remain first-class. Per-clip trim/transition controls are collapsed under Edit clip; Audio tracks and Mix & master are collapsed secondary sections.
+- Rebuild from approved takes, edit-plan download, continuity Re-direct and Precision acting are visually demoted power actions rather than competing with the stage's primary action.
+- Production Readiness provides one compact status control, stage indicators, dialogue-duration warnings and direct routing to blocking issues.
+- Dynamic UI organization uses one shared observer plus explicit shot-render events instead of multiple modules observing and rescanning the same DOM. CI enforces that single-observer ownership and rejects duplicate, missing or retired active assets.
+- Dialogue voice, Precision Acting, scene sound and final export failures use explicit recoverable states; retries preserve approved takes, timing and sound plans.
+- Production Readiness routes failed dialogue voices, performance passes and sound jobs back to their existing contextual controls without adding permanent panels.
+- No backend feature is removed by progressive disclosure; existing DOM controls and event handlers are moved into focused sheets so behavior stays intact.
+- World, Scene, Cast, continuity correction and sound-cue editing expand inside their current unified workspace instead of opening modal layers on top of modal layers.
+- Single-character Act-Two can use the approved take as its scene-preserving character video; choosing a custom character video clears that source mode so the UI and provider input remain truthful.
+
+Apple / iPhone readiness:
+- `viewport-fit=cover` plus safe-area padding are used for notched iPhones and standalone mode.
+- Primary custom controls meet a 44px minimum coarse-pointer target and have visible press/focus states.
+- Inputs use at least 16px text on touch devices to avoid Safari focus zoom.
+- `prefers-reduced-motion` and `prefers-contrast: more` are supported.
+- VisualViewport reduces keyboard-open shell spacing so the iPhone keyboard does not compete with the Director prompt.
+- Production-stage buttons expose pressed/current-step accessibility state.
+- `manifest.webmanifest` enables a standalone installable web-app shell.
+- `sw.js` uses network-first static CSS/JS with an offline cache fallback; it deliberately does not cache PHP pages or API routes, preventing stale UI code and production state.
+- Final App Store packaging can later use the same PHP/API backend with a Capacitor/native shell. Xcode/macOS are still required only for final iOS compilation, signing, TestFlight and App Store submission.
+- A final production app icon / Apple touch icon is intentionally not fabricated in code; add the approved brand artwork before store submission.
+
+Live provider requirements:
+- RUNWAY_API_KEY=...
+- ANIME_DIRECTOR_BASE_URL must point to the public HTTPS app URL.
+- ANIME_DIRECTOR_MOCK_MODE=0 for live generation.
+- World/scene/shot image, video and audio references must be provider-fetchable public HTTPS URLs.
+- Semantic roles available: character, environment, prop, style, motion, voice, sound, reference.
+- Seedance 2.5 native reference generation is preferred when World Memory or shot references are active.
+- Cast + Voices supports multiple recurring characters and per-character voice references.
+- Precision performance uses Runway Act-Two (`/v1/character_performance`, model `act_two`) one speaking character per pass.
+- Scene Continuity Review stores human checks plus deterministic metadata warnings.
+- Sound Design stores Scene Bed, Music Cue and timed Shot SFX/Foley as editorial assets.
+
+Final assembly / FFmpeg:
+- Timeline stores shot order, selected takes, trims, cut/crossfade intent and separate dialogue/ambience/music/SFX mix rules.
+- JSON manifest export always works.
+- Server MP4 render is enabled only when FFmpeg is executable by PHP.
+- Full renderer normalizes picture to the project orientation, applies trims, hard cuts or stored crossfades, and renders H.264/AAC.
+- Dialogue, Scene Bed, Music and SFX are mixed as separate buses.
+- Scene Bed / Music can loop across their scene ranges; SFX use their saved shot-relative timing.
+- Dialogue audio is placed in turn order within each shot when no explicit line timecode exists.
+- Music and ambience are sidechain-ducked under dialogue, then the final mix is limited and master fades are applied.
+- FFprobe is used when available to measure generated audio duration; safe editorial fallbacks are used otherwise.
+- Generated takes/audio must exist locally under the app storage for server rendering.
+
+Routing after upload:
+/ -> index.php -> director.php
+/director.php -> primary creator workspace
+/lab.php -> advanced workspace
