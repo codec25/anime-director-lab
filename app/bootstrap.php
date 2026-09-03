@@ -94,7 +94,4 @@ require_once AD_ROOT . '/app/providers/RunwayDescribeProvider.php';
 require_once AD_ROOT . '/app/providers/RunwayReferenceProvider.php';
 require_once AD_ROOT . '/app/providers/RunwayContinueProvider.php';
 require_once AD_ROOT . '/app/providers/ViduProvider.php';
-require_once AD_ROOT . '/app/providers/KlingProvider.php';
-require_once AD_ROOT . '/app/providers/GoogleProvider.php';
-require_once AD_ROOT . '/app/providers/WanProvider.php';
 require_once AD_ROOT . '/app/gateway.php';
